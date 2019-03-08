@@ -1,4 +1,7 @@
 // Copyright (c) 2011-2015 The Cryptonote developers
+// Copyright (c) 2015-2016 XDN developers
+// Copyright (c) 2016-2017 The Karbowanec developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -23,9 +26,10 @@ public:
   static WalletAdapter& instance();
 
   void open(const QString& _password);
+  void createWithKeys(const CryptoNote::AccountKeys& _keys, const std::string& password);
   void close();
   bool save(bool _details, bool _cache);
-  void backup(const QString& _file);
+  // void backup(const QString& _file);
 
   QString getAddress() const;
   quint64 getActualBalance() const;
@@ -38,6 +42,9 @@ public:
   void sendTransaction(const QVector<CryptoNote::WalletLegacyTransfer>& _transfers, quint64 _fee, const QString& _payment_id, quint64 _mixin);
   bool changePassword(const QString& _old_pass, const QString& _new_pass);
   void setWalletFile(const QString& _path);
+  Crypto::SecretKey getTxKey(Crypto::Hash& txid);
+
+  bool getAccountKeys(CryptoNote::AccountKeys& _keys);
 
   void initCompleted(std::error_code _result) Q_DECL_OVERRIDE;
   void saveCompleted(std::error_code _result) Q_DECL_OVERRIDE;
@@ -53,7 +60,7 @@ private:
   std::fstream m_file;
   CryptoNote::IWalletLegacy* m_wallet;
   QMutex m_mutex;
-  std::atomic<bool> m_isBackupInProgress;
+  // std::atomic<bool> m_isBackupInProgress;
   std::atomic<bool> m_isSynchronized;
   std::atomic<quint64> m_lastWalletTransactionId;
   QTimer m_newTransactionsNotificationTimer;
@@ -92,6 +99,7 @@ Q_SIGNALS:
   void openWalletWithPasswordSignal(bool _error);
   void changeWalletPasswordSignal();
   void updateWalletAddressSignal(const QString& _address);
+  void updateWalletNameSignal();
   void reloadWalletTransactionsSignal();
   void updateBlockStatusTextSignal();
   void updateBlockStatusTextWithDelaySignal();

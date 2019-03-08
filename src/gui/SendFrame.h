@@ -7,6 +7,7 @@
 #include <QFrame>
 
 #include <IWallet.h>
+#include <IWalletLegacy.h>
 
 namespace Ui {
   class SendFrame;
@@ -31,10 +32,13 @@ private:
   void sendTransactionCompleted(CryptoNote::TransactionId _id, bool _error, const QString& _error_text);
   void walletActualBalanceUpdated(quint64 _balance);
 
-  Q_SLOT void addRecipientClicked();
-  Q_SLOT void clearAllClicked();
+  // Q_SLOT void addRecipientClicked();
+  Q_SLOT void reset();
   Q_SLOT void mixinValueChanged(int _value);
   Q_SLOT void sendClicked();
+  QString getAddress() const;
+  qreal getAmount() const;
+  QString getAmountString() const;
 };
 
 }

@@ -2,14 +2,16 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "AddressBookModel.h"
+#include <QClipboard>
+
+// #include "AddressBookModel.h"
 #include "CurrencyAdapter.h"
 #include "MainWindow.h"
 #include "NodeAdapter.h"
 #include "SendFrame.h"
-#include "TransferFrame.h"
 #include "WalletAdapter.h"
 #include "WalletEvents.h"
+#include "ConfirmSendDialog.h"
 
 #include "ui_sendframe.h"
 
@@ -17,75 +19,103 @@ namespace WalletGui {
 
 SendFrame::SendFrame(QWidget* _parent) : QFrame(_parent), m_ui(new Ui::SendFrame) {
   m_ui->setupUi(this);
-  clearAllClicked();
+  reset();
   mixinValueChanged(m_ui->m_mixinSlider->value());
 
   connect(&WalletAdapter::instance(), &WalletAdapter::walletSendTransactionCompletedSignal, this, &SendFrame::sendTransactionCompleted,
     Qt::QueuedConnection);
-  connect(&WalletAdapter::instance(), &WalletAdapter::walletActualBalanceUpdatedSignal, this, &SendFrame::walletActualBalanceUpdated,
-    Qt::QueuedConnection);
+  connect(&WalletAdapter::instance(), &WalletAdapter::updateWalletAddressSignal, this, &SendFrame::reset);
+  connect(&WalletAdapter::instance(), &WalletAdapter::updateWalletNameSignal, this, &SendFrame::reset);
+  // connect(&WalletAdapter::instance(), &WalletAdapter::walletActualBalanceUpdatedSignal, this, &SendFrame::walletActualBalanceUpdated,
+    // Qt::QueuedConnection);
 
-  m_ui->m_tickerLabel->setText(CurrencyAdapter::instance().getCurrencyTicker().toUpper());
+  // m_ui->m_tickerLabel->setText(CurrencyAdapter::instance().getCurrencyTicker().toUpper());
+  // m_ui->m_amountSpin->setSuffix(" " + CurrencyAdapter::instance().getCurrencyTicker().toUpper());
+
+  m_ui->m_sendError->setText("");
 }
 
 SendFrame::~SendFrame() {
 }
 
-void SendFrame::addRecipientClicked() {
-  TransferFrame* newTransfer = new TransferFrame(m_ui->m_transfersScrollarea);
-  m_ui->m_send_frame_layout->insertWidget(m_transfers.size(), newTransfer);
-  m_transfers.append(newTransfer);
-  if (m_transfers.size() == 1) {
-    newTransfer->disableRemoveButton(true);
-  } else {
-    m_transfers[0]->disableRemoveButton(false);
-  }
+// void SendFrame::addRecipientClicked() {
+  // // TransferFrame* newTransfer = new TransferFrame(m_ui->m_transfersScrollarea);
+  // // m_ui->m_send_frame_layout->insertWidget(m_transfers.size(), newTransfer);
+  // // m_transfers.append(newTransfer);
+  // // if (m_transfers.size() == 1) {
+    // // newTransfer->disableRemoveButton(true);
+  // // } else {
+    // // m_transfers[0]->disableRemoveButton(false);
+  // // }
 
-  connect(newTransfer, &TransferFrame::destroyed, [this](QObject* _obj) {
-      m_transfers.removeOne(static_cast<TransferFrame*>(_obj));
-      if (m_transfers.size() == 1) {
-        m_transfers[0]->disableRemoveButton(true);
-      }
-    });
+  // // connect(newTransfer, &TransferFrame::destroyed, [this](QObject* _obj) {
+      // // m_transfers.removeOne(static_cast<TransferFrame*>(_obj));
+      // // // if (m_transfers.size() == 1) {
+        // // // m_transfers[0]->disableRemoveButton(true);
+      // // // }
+    // // });
+// }
+
+void SendFrame::reset() {
+  // Q_FOREACH (TransferFrame* transfer, m_transfers) {
+    // transfer->close();
+  // }
+
+  // m_transfers.clear();
+  // addRecipientClicked();
+  // Do not show payment id field
+  // Causes confusion for the user
+  // m_ui->m_paymentIdEdit->clear();
+  m_ui->m_addressEdit->clear();
+  m_ui->m_amountSpin->setValue(0);
+  m_ui->m_mixinSlider->setValue(0);
+  m_ui->m_sendError->clear();
 }
 
-void SendFrame::clearAllClicked() {
-  Q_FOREACH (TransferFrame* transfer, m_transfers) {
-    transfer->close();
-  }
-
-  m_transfers.clear();
-  addRecipientClicked();
-  m_ui->m_paymentIdEdit->clear();
-  m_ui->m_mixinSlider->setValue(2);
-}
-
+// Modified from original cryptonote gui wallet code
 void SendFrame::sendClicked() {
   QVector<CryptoNote::WalletLegacyTransfer> walletTransfers;
-  Q_FOREACH (TransferFrame * transfer, m_transfers) {
-    QString address = transfer->getAddress();
-    if (!CurrencyAdapter::instance().validateAddress(address)) {
-      QCoreApplication::postEvent(
-        &MainWindow::instance(),
-        new ShowMessageEvent(tr("Invalid recipient address"), QtCriticalMsg));
-      return;
-    }
-
-    CryptoNote::WalletLegacyTransfer walletTransfer;
-    walletTransfer.address = address.toStdString();
-    uint64_t amount = CurrencyAdapter::instance().parseAmount(transfer->getAmountString());
-    walletTransfer.amount = amount;
-    walletTransfers.push_back(walletTransfer);
-    QString label = transfer->getLabel();
-    if (!label.isEmpty()) {
-      AddressBookModel::instance().addAddress(label, address);
-    }
+  QString address = getAddress();
+  if (!CurrencyAdapter::instance().validateAddress(address)) {
+    QCoreApplication::postEvent(
+      &MainWindow::instance(),
+      new ShowMessageEvent(tr("Invalid recipient address"), QtCriticalMsg));
+    return;
   }
 
+  CryptoNote::WalletLegacyTransfer walletTransfer;
+  walletTransfer.address = address.toStdString();
+  uint64_t amount = CurrencyAdapter::instance().parseAmount(getAmountString());
+  walletTransfer.amount = amount;
+  walletTransfers.push_back(walletTransfer);
   quint64 fee = CurrencyAdapter::instance().getMinimumFee();
-  if (WalletAdapter::instance().isOpen()) {
-    WalletAdapter::instance().sendTransaction(walletTransfers, fee, m_ui->m_paymentIdEdit->text(), m_ui->m_mixinSlider->value());
+
+  ConfirmSendDialog dlg(&MainWindow::instance());
+
+  if (amount == 0)
+  {
+    m_ui->m_sendError->setText("Amount is 0");
   }
+  else if (!WalletAdapter::instance().isOpen())
+  {
+    m_ui->m_sendError->setText("Wallet is closed");
+  }
+  else if (amount + fee > WalletAdapter::instance().getActualBalance())
+  {
+    m_ui->m_sendError->setText("Not enough money");
+  }
+  else
+  {
+    dlg.showPaymentDetails(amount, address);
+
+    if (dlg.exec() == QDialog::Accepted)
+    {
+      WalletAdapter::instance().sendTransaction(walletTransfers, fee, "", m_ui->m_mixinSlider->value());
+      m_ui->m_sendError->setText("");
+    }
+  }
+  
+  
 }
 
 void SendFrame::mixinValueChanged(int _value) {
@@ -99,12 +129,26 @@ void SendFrame::sendTransactionCompleted(CryptoNote::TransactionId _id, bool _er
       &MainWindow::instance(),
       new ShowMessageEvent(_errorText, QtCriticalMsg));
   } else {
-    clearAllClicked();
+    reset();
   }
 }
 
-void SendFrame::walletActualBalanceUpdated(quint64 _balance) {
-  m_ui->m_balanceLabel->setText(CurrencyAdapter::instance().formatAmount(_balance));
+// void SendFrame::walletActualBalanceUpdated(quint64 _balance) {
+  // m_ui->m_balanceLabel->setText(CurrencyAdapter::instance().formatAmount(_balance));
+// }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+QString SendFrame::getAddress() const {
+  return m_ui->m_addressEdit->text().trimmed();
 }
-  
+
+qreal SendFrame::getAmount() const {
+  return m_ui->m_amountSpin->value();
+}
+
+QString SendFrame::getAmountString() const {
+  return m_ui->m_amountSpin->cleanText();
+}
+ 
 }

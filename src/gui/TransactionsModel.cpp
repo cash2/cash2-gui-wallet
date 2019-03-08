@@ -1,4 +1,7 @@
 // Copyright (c) 2011-2015 The Cryptonote developers
+// Copyright (c) 2015-2016 XDN developers
+// Copyright (c) 2016-2017 The Karbowanec developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,18 +17,16 @@
 
 namespace WalletGui {
 
-enum class TransactionType : quint8 {MINED, INPUT, OUTPUT, INOUT};
-
 namespace {
 
 QPixmap getTransactionIcon(TransactionType _transactionType) {
   switch (_transactionType) {
   case TransactionType::MINED:
     return QPixmap(":icons/tx-mined");
-  case TransactionType::INPUT:
-    return QPixmap(":icons/tx-input");
-  case TransactionType::OUTPUT:
-    return QPixmap(":icons/tx-output");
+  // case TransactionType::INPUT:
+    // return QPixmap(":icons/tx-input");
+  // case TransactionType::OUTPUT:
+    // return QPixmap(":icons/tx-output");
   case TransactionType::INOUT:
     return QPixmap(":icons/tx-inout");
   default:
@@ -68,7 +69,8 @@ Qt::ItemFlags TransactionsModel::flags(const QModelIndex& _index) const {
 }
 
 int TransactionsModel::columnCount(const QModelIndex& _parent) const {
-  return TransactionsModel::staticMetaObject.enumerator(TransactionsModel::staticMetaObject.indexOfEnumerator("Columns")).keyCount();
+  // return TransactionsModel::staticMetaObject.enumerator(TransactionsModel::staticMetaObject.indexOfEnumerator("Columns")).keyCount();
+  return 3;
 }
 
 int TransactionsModel::rowCount(const QModelIndex& _parent) const {
@@ -102,8 +104,9 @@ QVariant TransactionsModel::headerData(int _section, Qt::Orientation _orientatio
     }
 
   case Qt::TextAlignmentRole:
-    if (_section == COLUMN_AMOUNT) {
-      return static_cast<int>(Qt::AlignRight | Qt::AlignVCenter);
+    if (_section == COLUMN_DATE || _section == COLUMN_AMOUNT)
+    {
+      return static_cast<int>(Qt::AlignHCenter | Qt::AlignVCenter);
     }
 
     return QVariant();
@@ -183,7 +186,7 @@ QVariant TransactionsModel::getDisplayRole(const QModelIndex& _index) const {
   switch(_index.column()) {
   case COLUMN_DATE: {
     QDateTime date = _index.data(ROLE_DATE).toDateTime();
-    return (date.isNull() || !date.isValid() ? "-" : date.toString("dd-MM-yy HH:mm"));
+    return (date.isNull() || !date.isValid() ? "-" : date.toString("ddd MM-dd-yy hh:mm A"));
   }
 
   case COLUMN_HASH:
@@ -194,9 +197,10 @@ QVariant TransactionsModel::getDisplayRole(const QModelIndex& _index) const {
     QString transactionAddress = _index.data(ROLE_ADDRESS).toString();
     if (transactionType == TransactionType::INPUT || transactionType == TransactionType::MINED ||
         transactionType == TransactionType::INOUT) {
-      return QString(tr("me (%1)").arg(WalletAdapter::instance().getAddress()));
+      // return QString(tr("me (%1)").arg(WalletAdapter::instance().getAddress()));
+      return "";
     } else if (transactionAddress.isEmpty()) {
-      return tr("(n/a)");
+      return tr("unknown");
     }
 
     return transactionAddress;
@@ -205,7 +209,7 @@ QVariant TransactionsModel::getDisplayRole(const QModelIndex& _index) const {
   case COLUMN_AMOUNT: {
     qint64 amount = _index.data(ROLE_AMOUNT).value<qint64>();
     QString amountStr = CurrencyAdapter::instance().formatAmount(qAbs(amount));
-    return (amount < 0 ? "-" + amountStr : amountStr);
+    return (amount < 0 ? "- " + amountStr : "+ " + amountStr);
   }
 
   case COLUMN_PAYMENT_ID:

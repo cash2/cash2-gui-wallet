@@ -25,11 +25,27 @@ QString ChangePasswordDialog::getOldPassword() const {
 }
 
 void ChangePasswordDialog::checkPassword(const QString& _password) {
-  bool passwordIsConfirmed = !(m_ui->m_newPasswordEdit->text().trimmed().isEmpty() ||
-    m_ui->m_newPasswordConfirmationEdit->text().trimmed().isEmpty() ||
-    m_ui->m_newPasswordEdit->text().compare(m_ui->m_newPasswordConfirmationEdit->text()));
-  m_ui->m_errorLabel->setText(passwordIsConfirmed ? "" : tr("Password not confirmed"));
+  
+  bool passwordIsConfirmed = false;
+
+  if (!m_ui->m_newPasswordEdit->text().trimmed().isEmpty() && !m_ui->m_newPasswordConfirmationEdit->text().trimmed().isEmpty())
+  {
+    passwordIsConfirmed = !m_ui->m_newPasswordEdit->text().compare(m_ui->m_newPasswordConfirmationEdit->text());
+    m_ui->m_errorLabel->setText(passwordIsConfirmed ? "" : tr("Password not match"));
+  }
+  else
+  {
+    m_ui->m_errorLabel->setText("");
+  }
+
   m_ui->m_okButton->setEnabled(passwordIsConfirmed);
+  
+  // bool passwordIsConfirmed = !(m_ui->m_newPasswordEdit->text().trimmed().isEmpty() ||
+  // m_ui->m_newPasswordConfirmationEdit->text().trimmed().isEmpty() ||
+  // m_ui->m_newPasswordEdit->text().compare(m_ui->m_newPasswordConfirmationEdit->text()));
+
+  // m_ui->m_errorLabel->setText(passwordIsConfirmed ? "" : tr("Password not match"));
+  // m_ui->m_okButton->setEnabled(passwordIsConfirmed);
 }
 
 }

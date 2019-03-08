@@ -67,6 +67,7 @@ set(CRYPTONOTE_SOURCES
   cryptonote/src/Common/StringOutputStream.cpp
   cryptonote/src/Common/StringView.cpp
   cryptonote/src/Common/VectorOutputStream.cpp
+  cryptonote/src/crypto/blake2b-ref.c
   cryptonote/src/crypto/blake256.c
   cryptonote/src/crypto/chacha8.c
   cryptonote/src/crypto/crypto-ops-data.c
@@ -86,7 +87,7 @@ set(CRYPTONOTE_SOURCES
   cryptonote/src/crypto/slow-hash.c
   cryptonote/src/crypto/slow-hash.cpp
   cryptonote/src/crypto/tree-hash.c
-  cryptonote/src/CryptoNoteCore/BlockchainIndices.cpp
+  cryptonote/src/CryptoNoteCore/BlockchainIndexes.cpp
   cryptonote/src/CryptoNoteCore/BlockchainMessages.cpp
   cryptonote/src/CryptoNoteCore/BlockIndex.cpp
   cryptonote/src/CryptoNoteCore/CoreConfig.cpp
