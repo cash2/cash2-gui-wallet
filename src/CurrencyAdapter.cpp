@@ -1,4 +1,6 @@
 // Copyright (c) 2011-2015 The Cryptonote developers
+// Copyright (c) 2016-2018 The Karbowanec developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -43,6 +45,10 @@ quint64 CurrencyAdapter::getMinimumFee() const {
   return m_currency.minimumFee();
 }
 
+quint64 CurrencyAdapter::getAddressPrefix() const {
+  return m_currency.publicAddressBase58Prefix();
+}
+
 QString CurrencyAdapter::formatAmount(quint64 _amount) const {
   QString result = QString::number(_amount);
   if (result.length() < getNumberOfDecimalPlaces() + 1) {
@@ -50,13 +56,16 @@ QString CurrencyAdapter::formatAmount(quint64 _amount) const {
   }
 
   quint32 dot_pos = result.length() - getNumberOfDecimalPlaces();
-  for (quint32 pos = result.length() - 1; pos > dot_pos + 1; --pos) {
-    if (result[pos] == '0') {
-      result.remove(pos, 1);
-    } else {
-      break;
-    }
-  }
+
+  // // Removes rightmost zeros
+  // // I am not sure why someone would want to do this
+  // for (quint32 pos = result.length() - 1; pos > dot_pos + 1; --pos) {
+    // if (result[pos] == '0') {
+      // result.remove(pos, 1);
+    // } else {
+      // break;
+    // }
+  // }
 
   result.insert(dot_pos, ".");
   for (qint32 pos = dot_pos - 3; pos > 0; pos -= 3) {

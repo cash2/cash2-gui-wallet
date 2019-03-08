@@ -1,4 +1,7 @@
 // Copyright (c) 2011-2015 The Cryptonote developers
+// Copyright (c) 2015-2016 XDN developers
+// Copyright (c) 2016 The Karbowanec developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -36,7 +39,8 @@ public:
   QStringList getSeedNodes() const;
 
   QString getWalletFile() const;
-  QString getAddressBookFile() const;
+  QStringList getRecentWalletsList() const;
+  // QString getAddressBookFile() const;
   bool isEncrypted() const;
   QString getVersion() const;
   bool isStartOnLoginEnabled() const;
@@ -54,9 +58,19 @@ public:
   void setCloseToTrayEnabled(bool _enable);
 #endif
 
+  QString getConnection() const;
+  QStringList getRpcNodesList() const;
+  quint16 getCurrentLocalDaemonPort() const;
+  QString getCurrentRemoteNode() const;
+
+  void setConnection(const QString& _connection);
+  void setRpcNodesList(const QStringList& _RpcNodesList);
+  void setCurrentLocalDaemonPort(const quint16& _daemonPort);
+  void setCurrentRemoteNode(const QString& _remoteNode);
+
 private:
   QJsonObject m_settings;
-  QString m_addressBookFile;
+  // QString m_addressBookFile;
   CommandLineParser* m_cmdLineParser;
 
   Settings();

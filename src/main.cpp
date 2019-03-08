@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
     splash->show();
   }
 
-  splash->showMessage(QObject::tr("Loading blockchain..."), Qt::AlignLeft | Qt::AlignBottom, Qt::white);
+  // splash->showMessage(QObject::tr("Loading blockchain..."), Qt::AlignCenter | Qt::AlignBottom, Qt::red);
   app.processEvents();
   qRegisterMetaType<CryptoNote::TransactionId>("CryptoNote::TransactionId");
   qRegisterMetaType<quintptr>("quintptr");
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
 
   splash->finish(&MainWindow::instance());
   MainWindow::instance().show();
-  WalletAdapter::instance().open("");
+  // WalletAdapter::instance().open("");
   QObject::connect(QApplication::instance(), &QApplication::aboutToQuit, []() {
     MainWindow::instance().quit();
     if (WalletAdapter::instance().isOpen()) {

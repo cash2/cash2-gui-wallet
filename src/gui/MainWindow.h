@@ -1,4 +1,7 @@
 // Copyright (c) 2011-2015 The Cryptonote developers
+// Copyright (c) 2015-2016 XDN developers
+// Copyright (c) 2016 The Karbowanec developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -38,6 +41,8 @@ private:
   QSystemTrayIcon* m_trayIcon;
   QActionGroup* m_tabActionGroup;
   bool m_isAboutToQuit;
+  QList<QAction*> recentFileActionList;
+  const int maxRecentFiles;
 
   static MainWindow* m_instance;
 
@@ -57,16 +62,22 @@ private:
   void walletSynchronized(int _error, const QString& _error_text);
   void walletOpened(bool _error, const QString& _error_text);
   void walletClosed();
+  void updateRecentActionList();
 
   Q_SLOT void createWallet();
   Q_SLOT void openWallet();
-  Q_SLOT void backupWallet();
+  Q_SLOT void closeWallet();
+  // Q_SLOT void backupWallet();
   Q_SLOT void encryptWallet();
   Q_SLOT void aboutQt();
   Q_SLOT void about();
   Q_SLOT void setStartOnLogin(bool _on);
   Q_SLOT void setMinimizeToTray(bool _on);
   Q_SLOT void setCloseToTray(bool _on);
+  Q_SLOT void restoreFromKeys();
+  Q_SLOT void showPrivateKeys();
+  Q_SLOT void openConnectionSettings();
+  Q_SLOT void openRecent();
 
 #ifdef Q_OS_MAC
 public:

@@ -22,7 +22,7 @@ public:
 
 private:
   QScopedPointer<Ui::TransactionDetailsDialog> m_ui;
-  const QString m_detailsTemplate;
+  QString m_detailsTemplate;
 };
 
 }

@@ -33,6 +33,10 @@ private:
   void updateActualBalance(quint64 _balance);
   void updatePendingBalance(quint64 _balance);
   void reset();
+  void updateWalletAddress(const QString& _address);
+  void updateWalletName();
+  void clearAddress();
+  void clearWalletName();
 };
 
 }

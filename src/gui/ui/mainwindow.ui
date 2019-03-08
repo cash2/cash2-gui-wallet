@@ -73,27 +73,7 @@
      </widget>
     </item>
     <item>
-     <widget class="WalletGui::ReceiveFrame" name="m_receiveFrame">
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="WalletGui::TransactionsFrame" name="m_transactionsFrame">
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="WalletGui::AddressBookFrame" name="m_addressBookFrame">
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
       </property>
@@ -110,41 +90,53 @@
      <x>0</x>
      <y>0</y>
      <width>920</width>
-     <height>27</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="m_createWalletAction"/>
+    <widget class="QMenu" name="menuRecent_wallets">
+     <property name="title">
+      <string>Recent wallets</string>
+     </property>
+    </widget>
+    <addaction name="menuRecent_wallets"/>
     <addaction name="m_openWalletAction"/>
-    <addaction name="m_backupWalletAction"/>
+    <addaction name="m_createWalletAction"/>
+    <addaction name="m_restoreFromKeysAction"/>
+    <addaction name="m_closeWalletAction"/>
+    <addaction name="separator"/>
     <addaction name="m_exitAction"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
      <string>Settings</string>
     </property>
-    <addaction name="m_encryptWalletAction"/>
     <addaction name="m_changePasswordAction"/>
-    <addaction name="separator"/>
-    <addaction name="m_startOnLoginAction"/>
-    <addaction name="m_minimizeToTrayAction"/>
-    <addaction name="m_closeToTrayAction"/>
+    <addaction name="m_showPrivateKeys"/>
+    <addaction name="m_connectionSettingsAction"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
     <addaction name="m_aboutCryptonoteAction"/>
-    <addaction name="m_aboutQtAction"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>16</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -162,11 +154,16 @@
    </attribute>
    <addaction name="m_overviewAction"/>
    <addaction name="m_sendAction"/>
-   <addaction name="m_receiveAction"/>
    <addaction name="m_transactionsAction"/>
-   <addaction name="m_addressBookAction"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+  </widget>
   <action name="m_overviewAction">
    <property name="checkable">
     <bool>true</bool>
@@ -174,12 +171,15 @@
    <property name="enabled">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="../../resources.qrc">
-     <normaloff>:/icons/overview</normaloff>:/icons/overview</iconset>
-   </property>
    <property name="text">
-    <string>Overview</string>
+    <string>Home</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>16</pointsize>
+     <underline>false</underline>
+    </font>
    </property>
   </action>
   <action name="m_sendAction">
@@ -187,29 +187,16 @@
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../../resources.qrc">
-     <normaloff>:/icons/send</normaloff>:/icons/send</iconset>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Send</string>
    </property>
-  </action>
-  <action name="m_receiveAction">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../../resources.qrc">
-     <normaloff>:/icons/receive</normaloff>:/icons/receive</iconset>
-   </property>
-   <property name="text">
-    <string>Receive</string>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>16</pointsize>
+    </font>
    </property>
   </action>
   <action name="m_transactionsAction">
@@ -218,10 +205,6 @@
    </property>
    <property name="enabled">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../../resources.qrc">
-     <normaloff>:/icons/transactions</normaloff>:/icons/transactions</iconset>
    </property>
    <property name="text">
     <string>Transactions</string>
@@ -233,24 +216,6 @@
    </property>
    <property name="text">
     <string>Exit</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Q</string>
-   </property>
-  </action>
-  <action name="m_addressBookAction">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../../resources.qrc">
-     <normaloff>:/icons/address-book</normaloff>:/icons/address-book</iconset>
-   </property>
-   <property name="text">
-    <string>Address Book</string>
    </property>
   </action>
   <action name="m_createWalletAction">
@@ -267,14 +232,6 @@
    </property>
    <property name="text">
     <string>Open wallet</string>
-   </property>
-  </action>
-  <action name="m_encryptWalletAction">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Encrypt wallet</string>
    </property>
   </action>
   <action name="m_changePasswordAction">
@@ -296,44 +253,29 @@
     <string>About</string>
    </property>
   </action>
-  <action name="m_aboutQtAction">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
+  <action name="m_restoreFromKeysAction">
    <property name="text">
-    <string>About Qt</string>
+    <string>Restore from keys</string>
    </property>
   </action>
-  <action name="m_backupWalletAction">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
+  <action name="m_showPrivateKeys">
    <property name="text">
-    <string>Backup wallet</string>
+    <string>Show private keys</string>
    </property>
   </action>
-  <action name="m_startOnLoginAction">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
+  <action name="m_connectionSettingsAction">
    <property name="text">
-    <string>Start on system login</string>
+    <string>Node Connection</string>
    </property>
   </action>
-  <action name="m_minimizeToTrayAction">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
+  <action name="m_closeWalletAction">
    <property name="text">
-    <string>Minimize to tray</string>
+    <string>Close wallet</string>
    </property>
   </action>
-  <action name="m_closeToTrayAction">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
+  <action name="m_recentWalletsAction">
    <property name="text">
-    <string>Close to tray</string>
+    <string>Recent wallets</string>
    </property>
   </action>
  </widget>
@@ -351,21 +293,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WalletGui::ReceiveFrame</class>
-   <extends>QFrame</extends>
-   <header>gui/ReceiveFrame.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>WalletGui::TransactionsFrame</class>
    <extends>QFrame</extends>
    <header>gui/TransactionsFrame.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>WalletGui::AddressBookFrame</class>
-   <extends>QFrame</extends>
-   <header>gui/AddressBookFrame.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -406,22 +336,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_receiveAction</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>m_receiveFrame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>562</x>
-     <y>333</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>m_transactionsAction</sender>
    <signal>toggled(bool)</signal>
    <receiver>m_transactionsFrame</receiver>
@@ -434,22 +348,6 @@
     <hint type="destinationlabel">
      <x>787</x>
      <y>333</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_addressBookAction</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>m_addressBookFrame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>809</x>
-     <y>320</y>
     </hint>
    </hints>
   </connection>
@@ -486,18 +384,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_encryptWalletAction</sender>
+   <sender>m_restoreFromKeysAction</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>encryptWallet()</slot>
+   <slot>restoreFromKeys()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>449</x>
-     <y>299</y>
+     <x>489</x>
+     <y>274</y>
     </hint>
    </hints>
   </connection>
@@ -506,38 +404,6 @@
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>encryptWallet()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>449</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_aboutQtAction</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>aboutQt()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>449</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_backupWalletAction</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>backupWallet()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -566,10 +432,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_startOnLoginAction</sender>
-   <signal>triggered(bool)</signal>
+   <sender>m_showPrivateKeys</sender>
+   <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>setStartOnLogin(bool)</slot>
+   <slot>showPrivateKeys()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -582,34 +448,34 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_minimizeToTrayAction</sender>
-   <signal>triggered(bool)</signal>
+   <sender>m_connectionSettingsAction</sender>
+   <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>setMinimizeToTray(bool)</slot>
+   <slot>openConnectionSettings()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>459</x>
-     <y>299</y>
+     <x>494</x>
+     <y>319</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>m_closeToTrayAction</sender>
-   <signal>triggered(bool)</signal>
+   <sender>m_closeWalletAction</sender>
+   <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>setCloseToTray(bool)</slot>
+   <slot>closeWallet()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>459</x>
-     <y>299</y>
+     <x>489</x>
+     <y>274</y>
     </hint>
    </hints>
   </connection>
@@ -618,11 +484,7 @@
   <slot>createWallet()</slot>
   <slot>openWallet()</slot>
   <slot>encryptWallet()</slot>
-  <slot>aboutQt()</slot>
-  <slot>backupWallet()</slot>
   <slot>about()</slot>
-  <slot>setStartOnLogin(bool)</slot>
-  <slot>setMinimizeToTray(bool)</slot>
-  <slot>setCloseToTray(bool)</slot>
+  <slot>showPrivateKeys()</slot>
  </slots>
 </ui>
