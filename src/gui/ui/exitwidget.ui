@@ -50,7 +50,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Closing %1 wallet ...</string>
+        <string>Closing %1 Wallet ...</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

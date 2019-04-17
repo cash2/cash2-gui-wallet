@@ -1,6 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
 // Copyright (c) 2017-2018, The Karbo developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -267,6 +267,9 @@ struct COMMAND_RPC_GET_INFO {
     uint64_t white_peerlist_size;
     uint64_t grey_peerlist_size;
     uint32_t last_known_block_index;
+    std::string circulating_supply;
+    uint64_t min_tx_fee;
+    uint64_t dust_threshold;
 
     void serialize(ISerializer &s) {
       KV_MEMBER(status)
@@ -280,6 +283,9 @@ struct COMMAND_RPC_GET_INFO {
       KV_MEMBER(white_peerlist_size)
       KV_MEMBER(grey_peerlist_size)
       KV_MEMBER(last_known_block_index)
+      KV_MEMBER(circulating_supply)
+      KV_MEMBER(min_tx_fee)
+      KV_MEMBER(dust_threshold)
     }
   };
 };

@@ -1,6 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
 // Copyright (c) 2018, Karbo developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
                                  
   
@@ -188,7 +188,7 @@ std::error_code PaymentServiceJsonRpcServer::handleGetViewKey(const GetViewKey::
 }
 
 std::error_code PaymentServiceJsonRpcServer::handleGetStatus(const GetStatus::Request& request, GetStatus::Response& response) {
-  return service.getStatus(response.blockCount, response.knownBlockCount, response.lastBlockHash, response.peerCount);
+  return service.getStatus(response.blockCount, response.knownBlockCount, response.lastBlockHash, response.peerCount, response.minimalFee);
 }
 
                                                                                                                                                   

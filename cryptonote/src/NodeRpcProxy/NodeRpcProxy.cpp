@@ -1,5 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2016-2018, The Karbo developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -55,7 +56,9 @@ NodeRpcProxy::NodeRpcProxy(const std::string& nodeHost, unsigned short nodePort)
     m_nodeHost(nodeHost),
     m_nodePort(nodePort),
     m_lastLocalBlockTimestamp(0),
-    m_connected(true) {
+    m_connected(true),
+    m_minimalFee(CryptoNote::parameters::MINIMUM_FEE),
+    m_dustThreshold(CryptoNote::parameters::DEFAULT_DUST_THRESHOLD) {
   resetInternalState();
 }
 
@@ -115,7 +118,7 @@ bool NodeRpcProxy::shutdown() {
     m_workerThread.join();
   }
   m_state = STATE_NOT_INITIALIZED;
-
+  m_cv_initialized.notify_all();
   return true;
 }
 
@@ -231,6 +234,8 @@ void NodeRpcProxy::updateBlockchainStatus() {
     }
 
     updatePeerCount(getInfoResp.incoming_connections_count + getInfoResp.outgoing_connections_count);
+    m_minimalFee.store(getInfoResp.min_tx_fee, std::memory_order_relaxed);                                                                   
+    m_dustThreshold.store(getInfoResp.dust_threshold, std::memory_order_relaxed);                                                                   
   }
 
   if (m_connected != m_httpClient->isConnected()) {
@@ -299,6 +304,14 @@ uint32_t NodeRpcProxy::getKnownBlockCount() const {
 
 uint64_t NodeRpcProxy::getLastLocalBlockTimestamp() const {
   return m_lastLocalBlockTimestamp;
+}
+
+uint64_t NodeRpcProxy::getMinimalFee() const {
+  return m_minimalFee.load(std::memory_order_relaxed);
+}
+
+uint64_t NodeRpcProxy::getDustThreshold() const {
+  return m_dustThreshold.load(std::memory_order_relaxed);
 }
 
 void NodeRpcProxy::relayTransaction(const CryptoNote::Transaction& transaction, const Callback& callback) {

@@ -1,5 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2016-2018, The Karbo developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -330,7 +331,7 @@ std::unique_ptr<CryptoNote::IBlock> ICoreStub::getBlock(const Crypto::Hash& bloc
   return std::unique_ptr<CryptoNote::IBlock>(nullptr);
 }
 
-bool ICoreStub::handleIncomingTransaction(const CryptoNote::Transaction& tx, const Crypto::Hash& txHash, size_t blobSize, CryptoNote::tx_verification_context& tvc, bool keptByBlock) {
+bool ICoreStub::handleIncomingTransaction(const CryptoNote::Transaction& tx, const Crypto::Hash& txHash, size_t blobSize, CryptoNote::tx_verification_context& tvc, bool keptByBlock, uint32_t blockHeight) {
   auto result = transactionPool.emplace(std::make_pair(txHash, tx));
   tvc.m_verification_failed = !poolTxVerificationResult;
   tvc.m_added_to_pool = true;
@@ -357,3 +358,19 @@ bool ICoreStub::removeMessageQueue(CryptoNote::MessageQueue<CryptoNote::Blockcha
 void ICoreStub::setPoolChangesResult(bool result) {
   poolChangesResult = result;
 }
+
+uint64_t ICoreStub::getMinimalFeeForHeight(uint32_t height) {
+	return 10000000ULL;
+};
+
+uint64_t ICoreStub::getMinimalFee() {
+	return 10000000ULL;
+};
+
+uint64_t ICoreStub::getDustThreshold() {
+	return 10000000ULL;
+};
+
+uint32_t ICoreStub::get_current_blockchain_height() {
+  return 0;
+};

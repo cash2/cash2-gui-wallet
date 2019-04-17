@@ -9,26 +9,24 @@
 #include <QDialog>
 
 namespace Ui {
-class RestoreFromKeysDialog;
+class CreateNewWalletDialog;
 }
 
 namespace WalletGui {
 
-class RestoreFromKeysDialog : public QDialog {
+class CreateNewWalletDialog : public QDialog {
   Q_OBJECT
 
 public:
-  RestoreFromKeysDialog(QWidget* _parent);
-  ~RestoreFromKeysDialog();
+  CreateNewWalletDialog(QWidget* _parent);
+  ~CreateNewWalletDialog();
 
-  QString getSpendSecretKeyString() const;
-  QString getViewSecretKeyString() const;
+  QString getFilePath() const;
   QString getPasswordString() const;
   QString getPasswordConfirmString() const;
-  QString getFilePath() const;
 
 private:
-  QScopedPointer<Ui::RestoreFromKeysDialog> m_ui;
+  QScopedPointer<Ui::CreateNewWalletDialog> m_ui;
 
   int wordCount = 0;
 

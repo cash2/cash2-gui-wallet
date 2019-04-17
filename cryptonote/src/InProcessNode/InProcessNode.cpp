@@ -1,5 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2016-2018, The Karbo developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -420,6 +421,16 @@ uint64_t InProcessNode::getLastLocalBlockTimestamp() const {
   }
 
   return block.timestamp;
+}
+
+uint64_t InProcessNode::getMinimalFee() const {
+  std::unique_lock<std::mutex> lock(mutex);
+  return core.getMinimalFee();
+}
+
+uint64_t InProcessNode::getDustThreshold() const {
+  std::unique_lock<std::mutex> lock(mutex);
+  return core.getDustThreshold();
 }
 
 void InProcessNode::peerCountUpdated(size_t count) {

@@ -95,7 +95,9 @@ QVariant TransactionsModel::headerData(int _section, Qt::Orientation _orientatio
       return tr("Hash");
     case COLUMN_ADDRESS:
       return tr("Address");
-    case COLUMN_AMOUNT:
+    case COLUMN_AMOUNT_WITHOUT_FEE:
+      return tr("Amount Without Fee");
+    case COLUMN_AMOUNT_WITH_FEE:
       return tr("Amount");
     case COLUMN_PAYMENT_ID:
       return tr("PaymentID");
@@ -104,7 +106,7 @@ QVariant TransactionsModel::headerData(int _section, Qt::Orientation _orientatio
     }
 
   case Qt::TextAlignmentRole:
-    if (_section == COLUMN_DATE || _section == COLUMN_AMOUNT)
+    if (_section == COLUMN_DATE || _section == COLUMN_AMOUNT_WITH_FEE)
     {
       return static_cast<int>(Qt::AlignHCenter | Qt::AlignVCenter);
     }
@@ -171,7 +173,7 @@ QByteArray TransactionsModel::toCsv() const {
     QModelIndex ind = index(row, 0);
     res.append("\"").append(ind.data().toString().toUtf8()).append("\",");
     res.append("\"").append(ind.sibling(row, COLUMN_DATE).data().toString().toUtf8()).append("\",");
-    res.append("\"").append(ind.sibling(row, COLUMN_AMOUNT).data().toString().toUtf8()).append("\",");
+    res.append("\"").append(ind.sibling(row, COLUMN_AMOUNT_WITHOUT_FEE).data().toString().toUtf8()).append("\",");
     res.append("\"").append(ind.sibling(row, COLUMN_FEE).data().toString().toUtf8()).append("\",");
     res.append("\"").append(ind.sibling(row, COLUMN_HASH).data().toString().toUtf8()).append("\",");
     res.append("\"").append(ind.sibling(row, COLUMN_HEIGHT).data().toString().toUtf8()).append("\",");
@@ -206,7 +208,17 @@ QVariant TransactionsModel::getDisplayRole(const QModelIndex& _index) const {
     return transactionAddress;
   }
 
-  case COLUMN_AMOUNT: {
+  case COLUMN_AMOUNT_WITHOUT_FEE: {
+    qint64 amount = _index.data(ROLE_AMOUNT).value<qint64>();
+    qint64 fee = _index.data(ROLE_FEE).value<qint64>();
+
+    QString amountStr = CurrencyAdapter::instance().formatAmount(qAbs(amount));
+    QString amountMinusFeeStr = CurrencyAdapter::instance().formatAmount(qAbs(amount) - qAbs(fee));
+
+    return (amount < 0 ? "- " + amountMinusFeeStr : "+ " + amountStr);
+  }
+
+  case COLUMN_AMOUNT_WITH_FEE: {
     qint64 amount = _index.data(ROLE_AMOUNT).value<qint64>();
     QString amountStr = CurrencyAdapter::instance().formatAmount(qAbs(amount));
     return (amount < 0 ? "- " + amountStr : "+ " + amountStr);

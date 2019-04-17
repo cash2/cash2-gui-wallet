@@ -1,6 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
 // Copyright (c) 2016-2018, The Karbo developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -126,6 +126,12 @@ bool wallet_rpc_server::on_getbalance(const wallet_rpc::COMMAND_RPC_GET_BALANCE:
 }
 //------------------------------------------------------------------------------------------------------------------------------
 bool wallet_rpc_server::on_transfer(const wallet_rpc::COMMAND_RPC_TRANSFER::request& req, wallet_rpc::COMMAND_RPC_TRANSFER::response& res) {
+
+  if (req.fee < m_node.getMinimalFee()) {
+		logger(ERROR) << "Fee " << std::to_string(req.fee) << " is too low";
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_WRONG_FEE,
+			std::string("Fee " + std::to_string(req.fee) + " is too low"));
+	}
 
   if (req.mixin > m_currency.maxMixin()) {
 		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_WRONG_MIXIN,

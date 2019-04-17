@@ -17,12 +17,21 @@ ConfirmSendDialog::ConfirmSendDialog(QWidget* _parent) : QDialog(_parent), m_ui(
 ConfirmSendDialog::~ConfirmSendDialog() {
 }
 
-void ConfirmSendDialog::showPaymentDetails(quint64 _total, QString _address) {
-    QString confirmLabel = m_ui->m_confirmLabel->text();
-    m_ui->m_confirmLabel->setText(confirmLabel
-      .arg(CurrencyAdapter::instance().formatAmount(_total))
-      .arg(_address)
-    );
+void ConfirmSendDialog::showPaymentDetails(quint64 _amount, QString _address, quint64 _fee) {
+    // QString confirmLabel = m_ui->m_confirmLabel->text();
+    // m_ui->m_confirmLabel->setText(confirmLabel
+      // .arg(CurrencyAdapter::instance().formatAmount(_amount))
+      // .arg(_address)
+    // );
+
+    QString feeStr = CurrencyAdapter::instance().formatAmount(_fee);
+    // Remove any number of trailing 0's
+    feeStr.remove( QRegExp("0+$") );
+
+    m_ui->m_amount->setText(CurrencyAdapter::instance().formatAmount(_amount));
+    m_ui->m_address->setText(_address);
+    m_ui->m_fee->setText(feeStr);
+    m_ui->m_total->setText(CurrencyAdapter::instance().formatAmount(_amount + _fee));
 }
 
 }

@@ -7,34 +7,34 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QStandardPaths>
-#include "CreateWalletDialog.h"
-#include "ui_createwalletdialog.h"
+#include "CreateNewWalletDialog.h"
+#include "ui_createnewwalletdialog.h"
 
 namespace WalletGui {
 
-CreateWalletDialog::CreateWalletDialog(QWidget* _parent) : QDialog(_parent), m_ui(new Ui::CreateWalletDialog) {
+CreateNewWalletDialog::CreateNewWalletDialog(QWidget* _parent) : QDialog(_parent), m_ui(new Ui::CreateNewWalletDialog) {
   m_ui->setupUi(this);
   m_ui->m_errorLabel->setText("");
 }
 
-CreateWalletDialog::~CreateWalletDialog() {
+CreateNewWalletDialog::~CreateNewWalletDialog() {
 }
 
-QString CreateWalletDialog::getPasswordString() const {
+QString CreateNewWalletDialog::getPasswordString() const {
   return m_ui->m_password->text().trimmed();
 }
 
-QString CreateWalletDialog::getPasswordConfirmString() const {
+QString CreateNewWalletDialog::getPasswordConfirmString() const {
   return m_ui->m_passwordConfirm->text().trimmed();
 }
 
-QString CreateWalletDialog::getFilePath() const {
+QString CreateNewWalletDialog::getFilePath() const {
   QString defaultDirectory = QDir::currentPath();
   QString walletName = m_ui->m_walletName->text().trimmed();
   return QDir(defaultDirectory).filePath(walletName);
 }
 
-void CreateWalletDialog::checkPassword(const QString& _password) {
+void CreateNewWalletDialog::checkPassword(const QString& _password) {
 
   bool passwordIsConfirmed = false;
 

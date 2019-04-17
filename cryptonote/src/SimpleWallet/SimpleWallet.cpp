@@ -1,6 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
 // Copyright (c) 2016-2018, The Karbo developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -132,15 +132,25 @@ private:
   IterT m_end;
 };
 
+uint64_t getMinimalFee(const CryptoNote::NodeRpcProxy& node) {
+  if (node.getLastLocalBlockHeight() < CryptoNote::parameters::SOFT_FORK_HEIGHT_1)
+  {
+    return CryptoNote::parameters::MINIMUM_FEE_1;
+  }
+  
+  return CryptoNote::parameters::MINIMUM_FEE_2;
+}
+
 struct TransferCommand {
   const CryptoNote::Currency& m_currency;
+  const CryptoNote::NodeRpcProxy& m_node;
   size_t fake_outs_count;
   std::vector<CryptoNote::WalletLegacyTransfer> dsts;
   std::vector<uint8_t> extra;
   uint64_t fee;
 
-  TransferCommand(const CryptoNote::Currency& currency) :
-    m_currency(currency), fake_outs_count(0), fee(currency.minimumFee()) {
+  TransferCommand(const CryptoNote::Currency& currency, const CryptoNote::NodeRpcProxy& node) :
+    m_currency(currency), m_node(node), fake_outs_count(0), fee(getMinimalFee(m_node)) {
   }
 
   bool parseArguments(LoggerRef& logger, const std::vector<std::string> &args) {
@@ -181,8 +191,10 @@ struct TransferCommand {
               return false;
             }
 
-            if (fee < m_currency.minimumFee()) {
-              logger(ERROR, BRIGHT_RED) << "Fee value is less than minimum: " << m_currency.minimumFee();
+            uint64_t minimalFee = getMinimalFee(m_node);
+
+            if (fee < minimalFee) {
+              logger(ERROR, BRIGHT_RED) << "Your fee of " << fee << " is too low. Required fee = " << minimalFee;
               return false;
             }
           }
@@ -550,7 +562,7 @@ simple_wallet::simple_wallet(System::Dispatcher& dispatcher, const CryptoNote::C
   m_consoleHandler.setHandler("allTransactions", boost::bind(&simple_wallet::list_transactions, this, _1), "Show all transactions");
   m_consoleHandler.setHandler("payments", boost::bind(&simple_wallet::show_payments, this, _1), "payments <payment_id_1> [<payment_id_2> ... <payment_id_N>] - Show payments <payment_id_1>, ... <payment_id_N>");
   m_consoleHandler.setHandler("blockchainHeight", boost::bind(&simple_wallet::show_blockchain_height, this, _1), "Show blockchain height");
-  m_consoleHandler.setHandler("transfer", boost::bind(&simple_wallet::transfer, this, _1), "transfer <privacy_level> <adreess> <amount>, transfer amount to address with privicy level, <privacy_level> is the number of decoy transactions (0, 1, 2, or 3)");
+  m_consoleHandler.setHandler("transfer", boost::bind(&simple_wallet::transfer, this, _1), "transfer <privacy_level> <adreess> <amount> [-f fee], transfer amount to address with privicy level, <privacy_level> is the number of decoy transactions (0, 1, 2, or 3)");
   m_consoleHandler.setHandler("setLog", boost::bind(&simple_wallet::set_log, this, _1), "set_log <level> - Change log level, <level> is a number 0-4");
   m_consoleHandler.setHandler("address", boost::bind(&simple_wallet::print_address, this, _1), "Show wallet address");
   m_consoleHandler.setHandler("viewPrivateKey", boost::bind(&simple_wallet::print_view_secret_key, this, _1), "Show wallet view private key");
@@ -1253,9 +1265,18 @@ bool simple_wallet::show_blockchain_height(const std::vector<std::string>& args)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+uint64_t simple_wallet::getMinimalFee() {
+  if (m_node->getLastLocalBlockHeight() < CryptoNote::parameters::SOFT_FORK_HEIGHT_1)
+  {
+    return CryptoNote::parameters::MINIMUM_FEE_1;
+  }
+  
+  return CryptoNote::parameters::MINIMUM_FEE_2;
+}
+//----------------------------------------------------------------------------------------------------
 bool simple_wallet::transfer(const std::vector<std::string> &args) {
   try {
-    TransferCommand cmd(m_currency);
+    TransferCommand cmd(m_currency, *m_node);
 
     if (!cmd.parseArguments(logger, args))
       return false;

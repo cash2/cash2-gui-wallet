@@ -1,5 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2016-2018, The Karbo developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -50,6 +51,7 @@ namespace CryptoNote {
     virtual bool checkTransactionInputs(const CryptoNote::Transaction& tx, BlockInfo& maxUsedBlock, BlockInfo& lastFailed) override;
     virtual bool haveSpentKeyImages(const CryptoNote::Transaction& tx) override;
     virtual bool checkTransactionSize(size_t blobSize) override;
+    virtual bool checkTransactionExtraSize(size_t txExtraSize) override;
 
     bool init() { return init(Tools::getDefaultDataDirectory(), true); }
     bool init(const std::string& config_folder, bool load_existing);
@@ -76,6 +78,8 @@ namespace CryptoNote {
     Crypto::Hash getTailId();
     Crypto::Hash getTailId(uint32_t& height);
     difficulty_type getDifficultyForNextBlock();
+    uint64_t getMinimalFee(uint32_t height);
+    uint64_t getDustThreshold();
     uint64_t getCoinsInCirculation();
     bool addNewBlock(const Block& bl_, block_verification_context& bvc);
     bool resetAndSetGenesisBlock(const Block& b);

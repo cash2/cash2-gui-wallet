@@ -1,5 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2016-2018 The Karbo developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -686,7 +687,7 @@ TEST_F(InProcessNodeTests, getPoolDiffereceActualBC) {
     transactionHashes.insert(CryptoNote::getObjectHash(tx));
     CryptoNote::tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
     bool keptByBlock = false;
-    coreStub.handleIncomingTransaction(tx, CryptoNote::getObjectHash(tx), CryptoNote::getObjectBinarySize(tx), tvc, keptByBlock);
+    coreStub.handleIncomingTransaction(tx, CryptoNote::getObjectHash(tx), CryptoNote::getObjectBinarySize(tx), tvc, keptByBlock, node.getLastLocalBlockHeight());
     ASSERT_TRUE(tvc.m_added_to_pool);
     ASSERT_FALSE(tvc.m_verification_failed);
   }
@@ -725,7 +726,7 @@ TEST_F(InProcessNodeTests, getPoolDiffereceNotActualBC) {
     transactionHashes.insert(CryptoNote::getObjectHash(tx));
     CryptoNote::tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
     bool keptByBlock = false;
-    coreStub.handleIncomingTransaction(tx, CryptoNote::getObjectHash(tx), CryptoNote::getObjectBinarySize(tx), tvc, keptByBlock);
+    coreStub.handleIncomingTransaction(tx, CryptoNote::getObjectHash(tx), CryptoNote::getObjectBinarySize(tx), tvc, keptByBlock, node.getLastLocalBlockHeight());
     ASSERT_TRUE(tvc.m_added_to_pool);
     ASSERT_FALSE(tvc.m_verification_failed);
   }

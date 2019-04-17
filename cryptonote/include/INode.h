@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -69,6 +69,8 @@ public:
   virtual uint32_t getLocalBlockCount() const = 0;
   virtual uint32_t getKnownBlockCount() const = 0;
   virtual uint64_t getLastLocalBlockTimestamp() const = 0;
+  virtual uint64_t getMinimalFee() const = 0;
+  virtual uint64_t getDustThreshold() const = 0;
 
   virtual void relayTransaction(const Transaction& transaction, const Callback& callback) = 0;
   virtual void getRandomOutsByAmounts(std::vector<uint64_t>&& amounts, uint64_t outsCount, std::vector<CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& result, const Callback& callback) = 0;

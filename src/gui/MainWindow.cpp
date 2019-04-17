@@ -27,10 +27,10 @@
 #include "Settings.h"
 #include "WalletAdapter.h"
 #include "WalletEvents.h"
-#include "RestoreFromKeysDialog.h"
+#include "CreateWalletFromKeysDialog.h"
 #include "PrivateKeysDialog.h"
 #include "ConnectionSettings.h"
-#include "CreateWalletDialog.h"
+#include "CreateNewWalletDialog.h"
 
 #include "ui_mainwindow.h"
 
@@ -80,7 +80,7 @@ void MainWindow::connectToSignals() {
 }
 
 void MainWindow::initUi() {
-  setWindowTitle(QString("%1 Wallet %2").arg(CurrencyAdapter::instance().getCurrencyDisplayName()).arg(Settings::instance().getVersion()));
+  setWindowTitle(QString("Cash2 Wallet 4.2.1"));
 #ifdef Q_OS_WIN32
   if (QSystemTrayIcon::isSystemTrayAvailable()) {
     m_trayIcon = new QSystemTrayIcon(QPixmap(":images/cryptonote"), this);
@@ -226,8 +226,8 @@ bool MainWindow::event(QEvent* _event) {
   return QMainWindow::event(_event);
 }
 
-void MainWindow::createWallet() {
-  CreateWalletDialog dlg(this);
+void MainWindow::createNewWallet() {
+  CreateNewWalletDialog dlg(this);
   if (dlg.exec() == QDialog::Accepted) {
     QString filePath = dlg.getFilePath();
     QString passwordQString = dlg.getPasswordString().trimmed();
@@ -280,8 +280,8 @@ void MainWindow::openWallet() {
   }
 }
 
-void MainWindow::restoreFromKeys() {
-  RestoreFromKeysDialog dlg(this);
+void MainWindow::createWalletFromKeys() {
+  CreateWalletFromKeysDialog dlg(this);
   if (dlg.exec() == QDialog::Accepted) {
     QString filePath = dlg.getFilePath();
     QString spendSecretKeyQString = dlg.getSpendSecretKeyString().trimmed();
@@ -572,6 +572,9 @@ void MainWindow::walletOpened(bool _error, const QString& _error_text) {
     }
 
     m_ui->m_overviewAction->trigger();
+
+    deleteStartPrompt();
+
     m_ui->m_overviewFrame->show();
 
     // allow sending only after wallet is synchronized
@@ -630,6 +633,52 @@ void MainWindow::openConnectionSettings() {
 
       QMessageBox::information(this, tr("Connection settings changed"), tr("Connection mode will be changed after restarting the wallet."), QMessageBox::Ok);
     }
+}
+
+// ***Will cause a crash if the element does not exist
+void MainWindow::deleteStartPrompt()
+{
+  if (m_ui->horizontalLayout != nullptr)
+  {
+    delete m_ui->horizontalLayout;
+    m_ui->horizontalLayout = nullptr;
+  }
+
+  if (m_ui->m_openWalletButton != nullptr)
+  {
+    delete m_ui->m_openWalletButton;
+    m_ui->m_openWalletButton = nullptr;
+  }
+
+  if (m_ui->horizontalLayout_2 != nullptr)
+  {
+    delete m_ui->horizontalLayout_2;
+    m_ui->horizontalLayout_2 = nullptr;
+  }
+
+  if (m_ui->m_createNewWalletButton != nullptr)
+  {
+    delete m_ui->m_createNewWalletButton;
+    m_ui->m_createNewWalletButton = nullptr;
+  }
+
+  if (m_ui->horizontalLayout_3 != nullptr)
+  {
+    delete m_ui->horizontalLayout_3;
+    m_ui->horizontalLayout_3 = nullptr;
+  }
+
+  if (m_ui->m_createWalletFromKeysButton != nullptr)
+  {
+    delete m_ui->m_createWalletFromKeysButton;
+    m_ui->m_createWalletFromKeysButton = nullptr;
+  }
+
+  if (m_ui->m_start != nullptr)
+  {
+    delete m_ui->m_start;
+    m_ui->m_start = nullptr;
+  }
 }
 
 }

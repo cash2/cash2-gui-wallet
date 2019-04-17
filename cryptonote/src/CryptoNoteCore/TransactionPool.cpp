@@ -1,5 +1,7 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2016-2018, The Karbo developers
+// Copyright (c) 2018-2019, The TurtleCoin Developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -88,11 +90,13 @@ namespace CryptoNote {
   //---------------------------------------------------------------------------------
   tx_memory_pool::tx_memory_pool(
     const CryptoNote::Currency& currency, 
-    CryptoNote::ITransactionValidator& validator, 
+    CryptoNote::ITransactionValidator& validator,
+    CryptoNote::ICore& core,
     CryptoNote::ITimeProvider& timeProvider,
     Logging::ILogger& log) :
     m_currency(currency),
-    m_validator(validator), 
+    m_validator(validator),
+    m_core(core),
     m_timeProvider(timeProvider), 
     m_txCheckInterval(60, timeProvider),
     m_fee_index(boost::get<1>(m_transactions)),
@@ -114,21 +118,14 @@ namespace CryptoNote {
     uint64_t outputs_amount = get_outs_money_amount(tx);
 
     if (outputs_amount > inputs_amount) {
-      logger(INFO) << "transaction use more money then it has: use " << m_currency.formatAmount(outputs_amount) <<
-        ", have " << m_currency.formatAmount(inputs_amount);
+      logger(INFO) << "transaction use more money then it has: uses " << m_currency.formatAmount(outputs_amount) <<
+        ", has " << m_currency.formatAmount(inputs_amount);
       tvc.m_verification_failed = true;
       return false;
     }
 
     const uint64_t fee = inputs_amount - outputs_amount;
     bool isFusionTransaction = fee == 0 && m_currency.isFusionTransaction(tx, blobSize);
-    if (!keptByBlock && !isFusionTransaction && fee < m_currency.minimumFee()) {
-      logger(INFO) << "transaction fee is not enough: " << m_currency.formatAmount(fee) <<
-        ", minimum fee: " << m_currency.formatAmount(m_currency.minimumFee());
-      tvc.m_verification_failed = true;
-      tvc.m_tx_fee_too_small = true;
-      return false;
-    }
 
     //check key images for transaction if it is not kept by block
     if (!keptByBlock) {
@@ -163,8 +160,8 @@ namespace CryptoNote {
     }
 
     if (!keptByBlock) {
-      bool sizeValid = m_validator.checkTransactionSize(blobSize);
-      if (!sizeValid) {
+      bool txSizeValid = m_validator.checkTransactionSize(blobSize);
+      if (!txSizeValid) {
         logger(INFO) << "tx too big, rejected";
         tvc.m_verification_failed = true;
         return false;
@@ -209,7 +206,18 @@ namespace CryptoNote {
     }
 
     tvc.m_added_to_pool = true;
-    tvc.m_should_be_relayed = inputsValid;
+
+    uint32_t blockchainHeight = m_core.get_current_blockchain_height();
+
+    if (blockchainHeight < CryptoNote::parameters::SOFT_FORK_HEIGHT_1)
+    {
+      tvc.m_should_be_relayed = inputsValid;
+    }
+    else
+    {
+      tvc.m_should_be_relayed = inputsValid && (fee > 0 || isFusionTransaction);
+    }
+
     tvc.m_verification_failed = true;
 
     if (!addTransactionInputs(id, tx, keptByBlock))
@@ -331,11 +339,20 @@ namespace CryptoNote {
   bool tx_memory_pool::is_transaction_ready_to_go(const Transaction& tx, TransactionCheckInfo& txd) const {
 
     if (!m_validator.checkTransactionInputs(tx, txd.maxUsedBlock, txd.lastFailedBlock))
+    {
       return false;
+    }
+
+    if (!m_validator.checkTransactionExtraSize(tx.extra.size()))
+    {
+      return false;
+    }
 
     //if we here, transaction seems valid, but, anyway, check for key_images collisions with blockchain, just to be sure
     if (m_validator.haveSpentKeyImages(tx))
+    {
       return false;
+    }
 
     //transaction is ok.
     return true;

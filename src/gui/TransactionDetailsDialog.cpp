@@ -26,7 +26,7 @@ TransactionDetailsDialog::TransactionDetailsDialog(const QModelIndex& _index, QW
     _index.data(TransactionsModel::ROLE_ROW).toInt());
 
   quint64 numberOfConfirmations = index.data(TransactionsModel::ROLE_NUMBER_OF_CONFIRMATIONS).value<quint64>();
-  QString amountText = index.sibling(index.row(), TransactionsModel::COLUMN_AMOUNT).data().toString() + " " +
+  QString amountText = index.sibling(index.row(), TransactionsModel::COLUMN_AMOUNT_WITHOUT_FEE).data().toString() + " " +
     CurrencyAdapter::instance().getCurrencyTicker().toUpper();
   QString feeText = CurrencyAdapter::instance().formatAmount(index.data(TransactionsModel::ROLE_FEE).value<quint64>()) + " " +
     CurrencyAdapter::instance().getCurrencyTicker().toUpper();
@@ -83,8 +83,6 @@ TransactionDetailsDialog::TransactionDetailsDialog(const QModelIndex& _index, QW
       "<span style=\" font-size:40px;\">You received %1</span></p></p><br><br>\n\n"
       "<span style=\" text-decoration:underline;\">Block Confirmations</span></p><br>\n%2</p></p><br><br>\n\n"
       "<span style=\" text-decoration:underline;\">Date</span></p><br>\n%3</p></p><br><br>\n\n"
-      "<span style=\" text-decoration:underline;\">Received From</span></p><br>\n%4</p></p><br><br>\n\n"
-      "<span style=\" text-decoration:underline;\">Fee</span></p><br>\n%5</p></p><br><br>\n\n"
       "<span style=\" text-decoration:underline;\">Transaction Id</span></p><br>\n%6</p><br>\n</body></html>";
 
     m_ui->m_detailsBrowser->setHtml(
@@ -94,8 +92,6 @@ TransactionDetailsDialog::TransactionDetailsDialog(const QModelIndex& _index, QW
         // adds commas to numbers
         .arg(QString("%1").arg(QLocale(QLocale::English).toString(numberOfConfirmations)))
         .arg(index.sibling(index.row(), TransactionsModel::COLUMN_DATE).data().toString().toLower())
-        .arg(QString("unknown"))
-        .arg(feeText)
         .arg(index.sibling(index.row(), TransactionsModel::COLUMN_HASH).data().toString().toLower())
     );
   }

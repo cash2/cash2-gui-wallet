@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
-    <height>600</height>
+    <width>1550</width>
+    <height>958</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -36,24 +36,132 @@
     <normaloff>:/images/cryptonote</normaloff>:/images/cryptonote</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="WalletGui::OverviewFrame" name="m_overviewFrame">
+     <layout class="QVBoxLayout" name="m_start">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="m_openWalletButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>275</width>
+            <height>75</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>16</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Open Wallet</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPushButton" name="m_createNewWalletButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>350</width>
+            <height>75</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>16</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Create New Wallet</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QPushButton" name="m_createWalletFromKeysButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>425</width>
+            <height>75</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>16</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Create Wallet from Keys</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="WalletGui::TransactionsFrame" name="m_transactionsFrame">
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
       </property>
@@ -73,7 +181,7 @@
      </widget>
     </item>
     <item>
-     <widget class="WalletGui::TransactionsFrame" name="m_transactionsFrame">
+     <widget class="WalletGui::OverviewFrame" name="m_overviewFrame">
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
       </property>
@@ -89,7 +197,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>920</width>
+     <width>1550</width>
      <height>17</height>
     </rect>
    </property>
@@ -104,8 +212,8 @@
     </widget>
     <addaction name="menuRecent_wallets"/>
     <addaction name="m_openWalletAction"/>
-    <addaction name="m_createWalletAction"/>
-    <addaction name="m_restoreFromKeysAction"/>
+    <addaction name="m_createNewWalletAction"/>
+    <addaction name="m_createWalletFromKeysAction"/>
     <addaction name="m_closeWalletAction"/>
     <addaction name="separator"/>
     <addaction name="m_exitAction"/>
@@ -218,12 +326,12 @@
     <string>Exit</string>
    </property>
   </action>
-  <action name="m_createWalletAction">
+  <action name="m_createNewWalletAction">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Create wallet</string>
+    <string>Create new wallet</string>
    </property>
   </action>
   <action name="m_openWalletAction">
@@ -253,9 +361,9 @@
     <string>About</string>
    </property>
   </action>
-  <action name="m_restoreFromKeysAction">
+  <action name="m_createWalletFromKeysAction">
    <property name="text">
-    <string>Restore from keys</string>
+    <string>Create wallet from keys</string>
    </property>
   </action>
   <action name="m_showPrivateKeys">
@@ -265,7 +373,7 @@
   </action>
   <action name="m_connectionSettingsAction">
    <property name="text">
-    <string>Node Connection</string>
+    <string>Connection</string>
    </property>
   </action>
   <action name="m_closeWalletAction">
@@ -304,38 +412,6 @@
  </resources>
  <connections>
   <connection>
-   <sender>m_overviewAction</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>m_overviewFrame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>112</x>
-     <y>333</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_sendAction</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>m_sendFrame</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>337</x>
-     <y>333</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>m_transactionsAction</sender>
    <signal>toggled(bool)</signal>
    <receiver>m_transactionsFrame</receiver>
@@ -352,10 +428,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_createWalletAction</sender>
+   <sender>m_createNewWalletAction</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>createWallet()</slot>
+   <slot>createNewWallet()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -384,10 +460,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_restoreFromKeysAction</sender>
+   <sender>m_createWalletFromKeysAction</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>restoreFromKeys()</slot>
+   <slot>createWalletFromKeys()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -479,9 +555,89 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_sendAction</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>m_sendFrame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>333</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_overviewAction</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>m_overviewFrame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>112</x>
+     <y>333</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_openWalletButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openWallet()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_createNewWalletButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>createNewWallet()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_createWalletFromKeysButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>createWalletFromKeys()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>createWallet()</slot>
+  <slot>createNewWallet()</slot>
   <slot>openWallet()</slot>
   <slot>encryptWallet()</slot>
   <slot>about()</slot>
