@@ -26,7 +26,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Connection settings</string>
+   <string>Connection Settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -67,7 +67,7 @@
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>Local daemon</string>
+        <string>Local</string>
        </property>
       </widget>
      </item>
@@ -105,7 +105,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Remote daemon</string>
+        <string>Remote</string>
        </property>
        <property name="checked">
         <bool>false</bool>
@@ -148,6 +148,9 @@
          <family>Ebrima</family>
          <pointsize>12</pointsize>
         </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
        </property>
        <property name="editable">
         <bool>false</bool>

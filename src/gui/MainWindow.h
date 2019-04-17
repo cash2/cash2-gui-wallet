@@ -63,8 +63,9 @@ private:
   void walletOpened(bool _error, const QString& _error_text);
   void walletClosed();
   void updateRecentActionList();
+  void deleteStartPrompt();
 
-  Q_SLOT void createWallet();
+  Q_SLOT void createNewWallet();
   Q_SLOT void openWallet();
   Q_SLOT void closeWallet();
   // Q_SLOT void backupWallet();
@@ -74,7 +75,7 @@ private:
   Q_SLOT void setStartOnLogin(bool _on);
   Q_SLOT void setMinimizeToTray(bool _on);
   Q_SLOT void setCloseToTray(bool _on);
-  Q_SLOT void restoreFromKeys();
+  Q_SLOT void createWalletFromKeys();
   Q_SLOT void showPrivateKeys();
   Q_SLOT void openConnectionSettings();
   Q_SLOT void openRecent();

@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -31,6 +31,9 @@ public:
   virtual uint32_t getLocalBlockCount() const override { return 0; };
   virtual uint32_t getKnownBlockCount() const override { return 0; };
   virtual uint64_t getLastLocalBlockTimestamp() const override { return 0; }
+  virtual uint64_t getMinimalFee() const override { return 0; };
+  virtual uint64_t getDustThreshold() const override { return 0; };
+  virtual uint32_t get_current_blockchain_height() { return 0; };
 
   virtual void getNewBlocks(std::vector<Crypto::Hash>&& knownBlockIds, std::vector<CryptoNote::block_complete_entry>& newBlocks, uint32_t& height, const Callback& callback) override { callback(std::error_code()); };
 

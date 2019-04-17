@@ -1,5 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2016-2018, The Karbo developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -40,8 +41,10 @@ public:
   size_t numberOfDecimalPlaces() const { return m_numberOfDecimalPlaces; }
   uint64_t coin() const { return m_coin; }
 
-  uint64_t minimumFee() const { return m_mininumFee; }
+  uint64_t minimumFee() const { return m_minimumFee; }
+  uint64_t getMinimalFee(uint32_t height) const;
   uint64_t defaultDustThreshold() const { return m_defaultDustThreshold; }
+  uint64_t getDustThreshold(uint32_t height) const;
   uint64_t maxMixin() const { return m_maxMixin; }
 
   uint64_t difficultyTarget() const { return m_difficultyTarget; }
@@ -135,7 +138,7 @@ private:
   size_t m_numberOfDecimalPlaces;
   uint64_t m_coin;
 
-  uint64_t m_mininumFee;
+  uint64_t m_minimumFee;
   uint64_t m_defaultDustThreshold;
   uint64_t m_maxMixin;
 
@@ -164,8 +167,6 @@ private:
   std::string m_blockIndexesFileName;
   std::string m_txPoolFileName;
   std::string m_blockchainIndexesFileName;
-
-  uint64_t m_hardForkHeight1;
 
   static const std::vector<uint64_t> PRETTY_AMOUNTS;
 
@@ -210,7 +211,7 @@ public:
 
   CurrencyBuilder& numberOfDecimalPlaces(size_t val);
 
-  CurrencyBuilder& mininumFee(uint64_t val) { m_currency.m_mininumFee = val; return *this; }
+  CurrencyBuilder& minimumFee(uint64_t val) { m_currency.m_minimumFee = val; return *this; }
   CurrencyBuilder& defaultDustThreshold(uint64_t val) { m_currency.m_defaultDustThreshold = val; return *this; }
   CurrencyBuilder& maxMixin(uint64_t val) { m_currency.m_maxMixin = val; return *this; }
 
@@ -240,8 +241,6 @@ public:
   CurrencyBuilder& txPoolFileName(const std::string& val) { m_currency.m_txPoolFileName = val; return *this; }
   CurrencyBuilder& blockchainIndexesFileName(const std::string& val) { m_currency.m_blockchainIndexesFileName = val; return *this; }
   
-  CurrencyBuilder& hardForkHeight1(uint64_t val) { m_currency.m_hardForkHeight1 = val; return *this; }
-
   CurrencyBuilder& testnet(bool val) { m_currency.m_testnet = val; return *this; }
 
 private:

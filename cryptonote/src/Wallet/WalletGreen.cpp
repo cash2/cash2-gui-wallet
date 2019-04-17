@@ -1,7 +1,8 @@
 // Copyright (c) 2011-2016 The Cryptonote developers, The Bytecoin developers
 // Copyright (c) 2018, The BBSCoin Developers
 // Copyright (c) 2018, The Karbo Developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2018-2019, The TurtleCoin Developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -750,7 +751,10 @@ void WalletGreen::prepareTransaction(std::vector<WalletOuts>&& wallets,
   preparedTransaction.neededMoney = countNeededMoney(preparedTransaction.destinations, fee);
 
   std::vector<OutputToTransfer> selectedTransfers;
-  uint64_t foundMoney = selectTransfers(preparedTransaction.neededMoney, mixIn == 0, m_currency.defaultDustThreshold(), std::move(wallets), selectedTransfers);
+
+  uint64_t dustThreshold = m_node.getDustThreshold();
+
+  uint64_t foundMoney = selectTransfers(preparedTransaction.neededMoney, mixIn == 0, dustThreshold, std::move(wallets), selectedTransfers);
 
   if (foundMoney < preparedTransaction.neededMoney) {
     throw std::system_error(make_error_code(error::WRONG_AMOUNT), "Not enough money");
@@ -766,10 +770,10 @@ void WalletGreen::prepareTransaction(std::vector<WalletOuts>&& wallets,
   std::vector<InputInfo> keysInfo;
   prepareInputs(selectedTransfers, mixinResult, mixIn, keysInfo);
 
-  uint64_t donationAmount = pushDonationTransferIfPossible(donation, foundMoney - preparedTransaction.neededMoney, m_currency.defaultDustThreshold(), preparedTransaction.destinations);
+  uint64_t donationAmount = pushDonationTransferIfPossible(donation, foundMoney - preparedTransaction.neededMoney, dustThreshold, preparedTransaction.destinations);
   preparedTransaction.changeAmount = foundMoney - preparedTransaction.neededMoney - donationAmount;
 
-  std::vector<ReceiverAmounts> decomposedOutputs = splitDestinations(preparedTransaction.destinations, m_currency.defaultDustThreshold(), m_currency);
+  std::vector<ReceiverAmounts> decomposedOutputs = splitDestinations(preparedTransaction.destinations, dustThreshold, m_currency);
   if (preparedTransaction.changeAmount != 0) {
     WalletTransfer changeTransfer;
     changeTransfer.type = WalletTransferType::CHANGE;
@@ -777,7 +781,7 @@ void WalletGreen::prepareTransaction(std::vector<WalletOuts>&& wallets,
     changeTransfer.amount = static_cast<int64_t>(preparedTransaction.changeAmount);
     preparedTransaction.destinations.emplace_back(std::move(changeTransfer));
 
-    auto splittedChange = splitAmount(preparedTransaction.changeAmount, changeDestination, m_currency.defaultDustThreshold());
+    auto splittedChange = splitAmount(preparedTransaction.changeAmount, changeDestination, dustThreshold);
     decomposedOutputs.emplace_back(std::move(splittedChange));
   }
 
@@ -789,8 +793,10 @@ void WalletGreen::validateTransactionParameters(const TransactionParameters& tra
     throw std::system_error(make_error_code(error::ZERO_DESTINATION));
   }
 
-  if (transactionParameters.fee < m_currency.minimumFee()) {
-    throw std::system_error(make_error_code(error::FEE_TOO_SMALL));
+  if (transactionParameters.fee < m_node.getMinimalFee()) {
+    std::string message = "Fee is too small. Fee " + m_currency.formatAmount(transactionParameters.fee) +
+      ", minimum fee " + m_currency.formatAmount(m_node.getMinimalFee());
+    throw std::system_error(make_error_code(error::FEE_TOO_SMALL), message);
   }
 
   if (transactionParameters.donation.address.empty() != (transactionParameters.donation.threshold == 0)) {
@@ -1331,6 +1337,11 @@ size_t WalletGreen::validateSaveAndSendTransaction(const ITransactionReader& tra
   CryptoNote::Transaction cryptoNoteTransaction;
   if (!fromBinaryArray(cryptoNoteTransaction, transactionData)) {
     throw std::system_error(make_error_code(error::INTERNAL_WALLET_ERROR), "Failed to deserialize created transaction");
+  }
+
+  if (cryptoNoteTransaction.extra.size() > CryptoNote::parameters::MAX_TX_EXTRA_SIZE)
+  {
+    throw std::system_error(make_error_code(error::EXTRA_TOO_LARGE), "Transaction extra size is too large");
   }
 
   uint64_t fee = transaction.getInputTotalAmount() - transaction.getOutputTotalAmount();                                         

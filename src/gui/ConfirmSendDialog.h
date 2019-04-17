@@ -20,7 +20,7 @@ public:
   ConfirmSendDialog(QWidget* _parent);
   ~ConfirmSendDialog();
 
-  void showPaymentDetails(quint64 _total, QString _address);
+  void showPaymentDetails(quint64 _amount, QString _address, quint64 _fee);
 
 private:
   QScopedPointer<Ui::ConfirmSendDialog> m_ui;

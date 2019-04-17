@@ -1,6 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
 // Copyright (c) 2016-2018, The Karbowanec developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -77,13 +77,16 @@ namespace CryptoNote {
     virtual bool getTransactionsByPaymentId(const Crypto::Hash& paymentId, std::vector<Transaction>& transactions) override;
     virtual bool getOutByMSigGIndex(uint64_t amount, uint64_t gindex, MultisignatureOutput& out) override;
     virtual std::unique_ptr<IBlock> getBlock(const Crypto::Hash& blocksId) override;
-    virtual bool handleIncomingTransaction(const Transaction& tx, const Crypto::Hash& txHash, size_t blobSize, tx_verification_context& tvc, bool keptByBlock) override;
+    virtual bool handleIncomingTransaction(const Transaction& tx, const Crypto::Hash& txHash, size_t blobSize, tx_verification_context& tvc, bool keptByBlock, uint32_t blockHeight) override;
     virtual std::error_code executeLocked(const std::function<std::error_code()>& func) override;
+    virtual uint64_t getMinimalFeeForHeight(uint32_t height) override;
+    virtual uint64_t getMinimalFee() override;
+    virtual uint64_t getDustThreshold() override;
+    virtual uint32_t get_current_blockchain_height() override;
      
     virtual bool addMessageQueue(MessageQueue<BlockchainMessage>& messageQueue) override;
     virtual bool removeMessageQueue(MessageQueue<BlockchainMessage>& messageQueue) override;
 
-    uint32_t get_current_blockchain_height();
     bool have_block(const Crypto::Hash& id) override;
     std::vector<Crypto::Hash> buildSparseChain() override;
     std::vector<Crypto::Hash> buildSparseChain(const Crypto::Hash& startBlockId) override;
@@ -147,10 +150,12 @@ namespace CryptoNote {
     bool handle_incoming_block(const Block& b, block_verification_context& bvc, bool control_miner, bool relay_block);
 
     bool check_tx_syntax(const Transaction& tx);
-    bool check_tx_semantic(const Transaction& tx, bool kept_by_block);
+    bool check_tx_semantic(const Transaction& tx, bool kept_by_block, uint32_t blockHeight);
 
     bool check_tx_mixin(const Transaction& tx);
     bool is_key_image_spent(const Crypto::KeyImage& key_im);
+
+    bool check_tx_fee(const Transaction& tx, size_t blobSize, tx_verification_context& tvc, bool kept_by_block, uint32_t blockHeight);
 
     bool check_tx_ring_signature(const KeyInput& tx, const Crypto::Hash& tx_prefix_hash, const std::vector<Crypto::Signature>& sig);
     bool is_tx_spendtime_unlocked(uint64_t unlock_time);

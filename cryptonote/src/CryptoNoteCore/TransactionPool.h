@@ -1,5 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2016-2018, The Karbo developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -30,6 +31,7 @@
 #include "CryptoNoteCore/ITxPoolObserver.h"
 #include "CryptoNoteCore/VerificationContext.h"
 #include "CryptoNoteCore/BlockchainIndexes.h"
+#include "CryptoNoteCore/ICore.h"
 
 #include <Logging/LoggerRef.h>
 
@@ -74,6 +76,7 @@ namespace CryptoNote {
     tx_memory_pool(
       const CryptoNote::Currency& currency, 
       CryptoNote::ITransactionValidator& validator,
+      CryptoNote::ICore& core,
       CryptoNote::ITimeProvider& timeProvider,
       Logging::ILogger& log);
 
@@ -190,6 +193,7 @@ namespace CryptoNote {
 
     Tools::ObserverManager<ITxPoolObserver> m_observerManager;
     const CryptoNote::Currency& m_currency;
+    CryptoNote::ICore& m_core;
     OnceInTimeInterval m_txCheckInterval;
     mutable std::recursive_mutex m_transactions_lock;
     key_images_container m_spent_key_images;

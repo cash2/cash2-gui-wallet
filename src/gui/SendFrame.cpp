@@ -89,6 +89,7 @@ void SendFrame::sendClicked() {
   walletTransfer.amount = amount;
   walletTransfers.push_back(walletTransfer);
   quint64 fee = CurrencyAdapter::instance().getMinimumFee();
+  uint64_t total = amount + fee;
 
   ConfirmSendDialog dlg(&MainWindow::instance());
 
@@ -100,13 +101,13 @@ void SendFrame::sendClicked() {
   {
     m_ui->m_sendError->setText("Wallet is closed");
   }
-  else if (amount + fee > WalletAdapter::instance().getActualBalance())
+  else if (total > WalletAdapter::instance().getActualBalance())
   {
     m_ui->m_sendError->setText("Not enough money");
   }
   else
   {
-    dlg.showPaymentDetails(amount, address);
+    dlg.showPaymentDetails(amount, address, fee);
 
     if (dlg.exec() == QDialog::Accepted)
     {

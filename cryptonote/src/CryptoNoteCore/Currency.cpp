@@ -1,7 +1,6 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2016-2018  zawy12
 // Copyright (c) 2016-2018, The Karbowanec developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -62,7 +61,6 @@ bool Currency::init() {
   }
 
   if (isTestnet()) {
-    m_hardForkHeight1 = 0;
     m_blocksFileName = "testnet_" + m_blocksFileName;
     m_blocksCacheFileName = "testnet_" + m_blocksCacheFileName;
     m_blockIndexesFileName = "testnet_" + m_blockIndexesFileName;
@@ -606,6 +604,28 @@ bool Currency::checkProofOfWork2(Crypto::cn_context& context, const Block& block
   return check_hash2(proofOfWork, currentDiffic);
 }
 
+uint64_t Currency::getMinimalFee(uint32_t height) const
+{
+  if (height < parameters::SOFT_FORK_HEIGHT_1)
+  {
+    return parameters::MINIMUM_FEE_1;
+  }
+  
+  return parameters::MINIMUM_FEE_2;
+
+}
+
+uint64_t Currency::getDustThreshold(uint32_t height) const
+{
+  if (height < parameters::SOFT_FORK_HEIGHT_1)
+  {
+    return parameters::DEFAULT_DUST_THRESHOLD_1;
+  }
+  
+  return parameters::DEFAULT_DUST_THRESHOLD_2;
+
+}
+
 size_t Currency::getApproximateMaximumInputCount(size_t transactionSize, size_t outputCount, size_t mixinCount) const {
   const size_t KEY_IMAGE_SIZE = sizeof(Crypto::KeyImage);
   const size_t OUTPUT_KEY_SIZE = sizeof(decltype(KeyOutput::key));
@@ -648,7 +668,7 @@ CurrencyBuilder::CurrencyBuilder(Logging::ILogger& log) : m_currency(log) {
 
   numberOfDecimalPlaces(parameters::CRYPTONOTE_DISPLAY_DECIMAL_POINT);
 
-  mininumFee(parameters::MINIMUM_FEE);
+  minimumFee(parameters::MINIMUM_FEE);
   defaultDustThreshold(parameters::DEFAULT_DUST_THRESHOLD);
   maxMixin(parameters::MAX_MIXIN);
 
@@ -677,8 +697,6 @@ CurrencyBuilder::CurrencyBuilder(Logging::ILogger& log) : m_currency(log) {
   blockIndexesFileName(parameters::CRYPTONOTE_BLOCKINDEXES_FILENAME);
   txPoolFileName(parameters::CRYPTONOTE_POOLDATA_FILENAME);
   blockchainIndexesFileName(parameters::CRYPTONOTE_BLOCKCHAIN_INDEXES_FILENAME);
-
-  hardForkHeight1(parameters::HARD_FORK_HEIGHT_1);
 
   testnet(false);
 }

@@ -7,42 +7,42 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QStandardPaths>
-#include "RestoreFromKeysDialog.h"
-#include "ui_restorefromkeysdialog.h"
+#include "CreateWalletFromKeysDialog.h"
+#include "ui_createwalletfromkeysdialog.h"
 
 namespace WalletGui {
 
-RestoreFromKeysDialog::RestoreFromKeysDialog(QWidget* _parent) : QDialog(_parent), m_ui(new Ui::RestoreFromKeysDialog) {
+CreateWalletFromKeysDialog::CreateWalletFromKeysDialog(QWidget* _parent) : QDialog(_parent), m_ui(new Ui::CreateWalletFromKeysDialog) {
   m_ui->setupUi(this);
   m_ui->m_errorLabel->setText("");
 }
 
-RestoreFromKeysDialog::~RestoreFromKeysDialog() {
+CreateWalletFromKeysDialog::~CreateWalletFromKeysDialog() {
 }
 
-QString RestoreFromKeysDialog::getSpendSecretKeyString() const {
+QString CreateWalletFromKeysDialog::getSpendSecretKeyString() const {
   return m_ui->m_spendPrivateKey->text().trimmed();
 }
 
-QString RestoreFromKeysDialog::getViewSecretKeyString() const {
+QString CreateWalletFromKeysDialog::getViewSecretKeyString() const {
   return m_ui->m_viewPrivateKey->text().trimmed();
 }
 
-QString RestoreFromKeysDialog::getPasswordString() const {
+QString CreateWalletFromKeysDialog::getPasswordString() const {
   return m_ui->m_password->text().trimmed();
 }
 
-QString RestoreFromKeysDialog::getPasswordConfirmString() const {
+QString CreateWalletFromKeysDialog::getPasswordConfirmString() const {
   return m_ui->m_passwordConfirm->text().trimmed();
 }
 
-QString RestoreFromKeysDialog::getFilePath() const {
+QString CreateWalletFromKeysDialog::getFilePath() const {
   QString defaultDirectory = QDir::currentPath();
   QString walletName = m_ui->m_walletName->text().trimmed();
   return QDir(defaultDirectory).filePath(walletName);
 }
 
-void RestoreFromKeysDialog::checkPassword(const QString& _password) {
+void CreateWalletFromKeysDialog::checkPassword(const QString& _password) {
 
   bool passwordIsConfirmed = false;
 
@@ -59,7 +59,7 @@ void RestoreFromKeysDialog::checkPassword(const QString& _password) {
   m_ui->m_okButton->setEnabled(passwordIsConfirmed);
 }
 
-// void RestoreFromKeysDialog::selectPathClicked() {
+// void CreateWalletFromKeysDialog::selectPathClicked() {
   // QString filePath = QFileDialog::getSaveFileName(this, tr("Wallet file"),
 // #ifdef Q_OS_WIN
     // //QApplication::applicationDirPath(),
@@ -77,7 +77,7 @@ void RestoreFromKeysDialog::checkPassword(const QString& _password) {
   // m_ui->m_pathEdit->setText(filePath);
 // }
 
-// void RestoreFromMnemonicSeedDialog::onTextChanged() {
+// void CreateWalletFromMnemonicSeedDialog::onTextChanged() {
   // wordCount = m_ui->m_seedEdit->toPlainText().split(QRegExp("(\\s|\\n|\\r)+")
                                                   // , QString::SkipEmptyParts).count();
   // if(wordCount != 25) {

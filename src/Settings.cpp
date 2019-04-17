@@ -75,7 +75,7 @@ void Settings::load() {
 
   // remote nodes list
   QStringList defaultNodesList;
-  defaultNodesList << "wallet.cash2.org:12276";
+  defaultNodesList << "wallet.cash2.org:12276" << "wallet2.cash2.org:12278";
   if (!m_settings.contains(OPTION_RPCNODES)) {
     setRpcNodesList(QStringList() << defaultNodesList);
   } else {

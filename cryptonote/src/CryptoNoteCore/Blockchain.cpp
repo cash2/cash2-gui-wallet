@@ -1,5 +1,7 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
-// Copyright (c) 2018 The Cash2 developers
+// Copyright (c) 2018-2019, The TurtleCoin Developers
+// Copyright (c) 2016-2018, The Karbo developers
+// Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -381,6 +383,23 @@ bool Blockchain::checkTransactionSize(size_t blobSize) {
   return true;
 }
 
+bool Blockchain::checkTransactionExtraSize(size_t txExtraSize)
+{
+
+  uint32_t blockchainHeight = getCurrentBlockchainHeight();
+
+  if (blockchainHeight >= CryptoNote::parameters::SOFT_FORK_HEIGHT_1)
+  {
+    if (txExtraSize > CryptoNote::parameters::MAX_TX_EXTRA_SIZE)
+    {
+      logger(ERROR) << "transaction extra size is too big " << txExtraSize << ", maximum allowed size is " << CryptoNote::parameters::MAX_TX_EXTRA_SIZE;
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool Blockchain::haveTransaction(const Crypto::Hash &id) {
   std::lock_guard<decltype(m_blockchain_lock)> lk(m_blockchain_lock);
   return m_transactionMap.find(id) != m_transactionMap.end();
@@ -444,12 +463,7 @@ bool Blockchain::init(const std::string& config_folder, bool load_existing) {
     }
   }
 
-  uint32_t blockchainHeight = static_cast<uint32_t>(m_blocks.size());
-
-  if (blockchainHeight < parameters::HARD_FORK_HEIGHT_1)
-  {
-    update_next_comulative_size_limit();
-  }
+  // removed hard fork 1 if clause here
 
   uint64_t timestamp_diff = time(NULL) - m_blocks.back().bl.timestamp;
   if (!m_blocks.back().bl.timestamp) {
@@ -667,6 +681,17 @@ difficulty_type Blockchain::getDifficultyForNextBlock() {
   }
 }
 
+uint64_t Blockchain::getMinimalFee(uint32_t height)
+{
+  return m_currency.getMinimalFee(height);
+}
+
+uint64_t Blockchain::getDustThreshold()
+{
+  uint32_t blockchainHeight = getCurrentBlockchainHeight();
+  return m_currency.getDustThreshold(blockchainHeight);
+}
+
 uint64_t Blockchain::getCoinsInCirculation() {
   std::lock_guard<decltype(m_blockchain_lock)> lk(m_blockchain_lock);
   if (m_blocks.empty()) {
@@ -841,6 +866,23 @@ bool Blockchain::prevalidate_miner_transaction(const Block& b, uint32_t height) 
     return false;
   }
 
+  // check that the base transaction does not contain any signatures
+  if (height >= CryptoNote::parameters::SOFT_FORK_HEIGHT_1)
+  {
+    // b.baseTransaction.signatures is a vector of vectors (please see include/CryptoNote.h)
+    // b.baseTransaction.signautres.size() returns 1 because it contains 1 empty vector
+    // If we use GDB on Ubuntu to print b.baseTransaction.signatures, we get "std::vector of length 1, capacity 1 = {std::vector of length 0, capacity 0}"
+    // Therefore, to check if we don't have any signatures, we must check that the inner vector of signatures is empty
+    for (const auto& innerSignatureVector : b.baseTransaction.signatures)
+    {
+      if (!innerSignatureVector.empty())
+      {
+        logger(ERROR, BRIGHT_RED) << "coinbase transaction shouldn't have signatures.";
+        return false;
+      }
+    }
+  }
+
   if (!(b.baseTransaction.inputs[0].type() == typeid(BaseInput))) {
     logger(ERROR, BRIGHT_RED)
       << "coinbase transaction in the block has the wrong type";
@@ -877,24 +919,12 @@ bool Blockchain::validate_miner_transaction(const Block& b, uint32_t height, siz
     minerReward += o.amount;
   }
 
-  if (height < parameters::HARD_FORK_HEIGHT_1)
-  {
-    std::vector<size_t> lastBlocksSizes;
-    get_last_n_blocks_sizes(lastBlocksSizes, m_currency.rewardBlocksWindow());
-    size_t blocksSizeMedian = Common::medianValue(lastBlocksSizes);
+  // removed hard fork 1 if clause here
 
-    if (!m_currency.getBlockReward1(blocksSizeMedian, cumulativeBlockSize, alreadyGeneratedCoins, fee, reward, emissionChange)) {
-      logger(INFO, BRIGHT_WHITE) << "block size " << cumulativeBlockSize << " is bigger than allowed for this blockchain";
-      return false;
-    }
-  }
-  else
+  if (!m_currency.getBlockReward2(height, cumulativeBlockSize, alreadyGeneratedCoins, fee, reward, emissionChange))
   {
-    if (!m_currency.getBlockReward2(height, cumulativeBlockSize, alreadyGeneratedCoins, fee, reward, emissionChange))
-    {
-      logger(INFO, BRIGHT_WHITE) << "block size " << cumulativeBlockSize << " is bigger than allowed for this blockchain";
-      return false;
-    }
+    logger(INFO, BRIGHT_WHITE) << "block size " << cumulativeBlockSize << " is bigger than allowed for this blockchain";
+    return false;
   }
 
   if (minerReward > reward) {
@@ -1895,10 +1925,7 @@ bool Blockchain::pushBlock(const Block& blockData, const std::vector<Transaction
 
   bvc.m_added_to_main_chain = true;
 
-  if (blockchainHeight < parameters::HARD_FORK_HEIGHT_1)
-  {
-    update_next_comulative_size_limit();
-  }
+  // removed hard fork 1 if clause here
 
   return true;
 }

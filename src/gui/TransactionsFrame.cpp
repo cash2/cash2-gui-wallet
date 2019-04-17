@@ -23,7 +23,7 @@ TransactionsFrame::TransactionsFrame(QWidget* _parent) : QFrame(_parent), m_ui(n
   m_ui->m_transactionsView->header()->setSectionResizeMode(TransactionsModel::COLUMN_STATE, QHeaderView::Fixed);
   m_ui->m_transactionsView->header()->resizeSection(TransactionsModel::COLUMN_STATE, 30);
   m_ui->m_transactionsView->header()->resizeSection(TransactionsModel::COLUMN_DATE, 800);
-  m_ui->m_transactionsView->header()->resizeSection(TransactionsModel::COLUMN_AMOUNT, 800);
+  m_ui->m_transactionsView->header()->resizeSection(TransactionsModel::COLUMN_AMOUNT_WITH_FEE, 800);
   // m_ui->m_transactionsView->header()->resizeSection(TransactionsModel::COLUMN_ADDRESS, 800);
 }
 
