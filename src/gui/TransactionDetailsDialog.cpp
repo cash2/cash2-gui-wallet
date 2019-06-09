@@ -26,7 +26,9 @@ TransactionDetailsDialog::TransactionDetailsDialog(const QModelIndex& _index, QW
     _index.data(TransactionsModel::ROLE_ROW).toInt());
 
   quint64 numberOfConfirmations = index.data(TransactionsModel::ROLE_NUMBER_OF_CONFIRMATIONS).value<quint64>();
-  QString amountText = index.sibling(index.row(), TransactionsModel::COLUMN_AMOUNT_WITHOUT_FEE).data().toString() + " " +
+  QString amountWithoutFeeText = index.sibling(index.row(), TransactionsModel::COLUMN_AMOUNT_WITHOUT_FEE).data().toString() + " " +
+    CurrencyAdapter::instance().getCurrencyTicker().toUpper();
+  QString amountWithFeeText = index.sibling(index.row(), TransactionsModel::COLUMN_AMOUNT_WITH_FEE).data().toString() + " " +
     CurrencyAdapter::instance().getCurrencyTicker().toUpper();
   QString feeText = CurrencyAdapter::instance().formatAmount(index.data(TransactionsModel::ROLE_FEE).value<quint64>()) + " " +
     CurrencyAdapter::instance().getCurrencyTicker().toUpper();
@@ -62,7 +64,7 @@ TransactionDetailsDialog::TransactionDetailsDialog(const QModelIndex& _index, QW
     m_ui->m_detailsBrowser->setHtml(
       m_detailsTemplate
         // removes '+' and '-' from amount
-        .arg(amountText.remove(0, 2))
+        .arg(amountWithFeeText.remove(0, 2))
         // adds commas to numbers
         .arg(QString("%1").arg(QLocale(QLocale::English).toString(numberOfConfirmations)))
         .arg(index.sibling(index.row(), TransactionsModel::COLUMN_DATE).data().toString())
@@ -88,7 +90,7 @@ TransactionDetailsDialog::TransactionDetailsDialog(const QModelIndex& _index, QW
     m_ui->m_detailsBrowser->setHtml(
       m_detailsTemplate
         // removes '+' and '-' from amount
-        .arg(amountText.remove(0, 2))
+        .arg(amountWithoutFeeText.remove(0, 2))
         // adds commas to numbers
         .arg(QString("%1").arg(QLocale(QLocale::English).toString(numberOfConfirmations)))
         .arg(index.sibling(index.row(), TransactionsModel::COLUMN_DATE).data().toString().toLower())

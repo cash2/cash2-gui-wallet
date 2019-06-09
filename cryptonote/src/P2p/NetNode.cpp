@@ -1,4 +1,5 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
+// Copyright (c) 2018-2019 The Karbo developers
 // Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -1270,7 +1271,7 @@ namespace CryptoNote
   }
 
   void NodeServer::acceptLoop() {
-    for (;;) {
+    while (!m_stop) {
       try {
         P2pConnectionContext ctx(m_dispatcher, logger.getLogger(), m_listener.accept());
         ctx.m_connection_id = boost::uuids::random_generator()();

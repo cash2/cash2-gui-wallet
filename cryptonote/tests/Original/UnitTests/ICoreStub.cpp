@@ -367,10 +367,6 @@ uint64_t ICoreStub::getMinimalFee() {
 	return 10000000ULL;
 };
 
-uint64_t ICoreStub::getDustThreshold() {
-	return 10000000ULL;
-};
-
 uint32_t ICoreStub::get_current_blockchain_height() {
   return 0;
 };

@@ -585,6 +585,8 @@ bool RpcServer::on_getblocktemplate(const COMMAND_RPC_GETBLOCKTEMPLATE::request&
 
   BinaryArray baseTransactionBA = toBinaryArray(b.baseTransaction);
 
+  // res.tranasction_hashes is used for the sole purpose of calculating the merkle root and does not affect what transaction hashes are included in the block
+
   if (baseTransactionBA.size() > 120)
   {
     BinaryArray baseTransactionHeadBA(baseTransactionBA.begin(), baseTransactionBA.end() - 120);

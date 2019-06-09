@@ -16,7 +16,6 @@
 #include "CryptoNoteCore/Currency.h"
 #include "CryptoNoteCore/TransactionExtra.h"
 #include "CryptoNoteCore/TransactionPool.h"
-#include "ICoreStub.h"
 
 #include <Logging/ConsoleLogger.h>
 #include <Logging/LoggerGroup.h>
@@ -155,7 +154,6 @@ protected:
   Logging::ConsoleLogger logger;
   CryptoNote::Currency currency;
   boost::filesystem::path m_configDir;
-  ICoreStub coreStub;
 };
 
 namespace
@@ -174,10 +172,9 @@ namespace
 
     Validator validator;
     TimeProvider timeProvider;
-    ICoreStub coreStub;
 
     TestPool(const CryptoNote::Currency& currency, Logging::ILogger& logger) :
-      tx_memory_pool(currency, validator, coreStub, timeProvider, logger) {}
+      tx_memory_pool(currency, validator, timeProvider, logger) {}
   };
 
   class TxTestBase {
@@ -185,7 +182,7 @@ namespace
     TxTestBase(size_t ringSize) :
       m_currency(CryptoNote::CurrencyBuilder(m_logger).currency()),
       txGenerator(m_currency, ringSize),
-      pool(m_currency, validator, coreStub, m_time, m_logger)
+      pool(m_currency, validator, m_time, m_logger)
     {
       txGenerator.createSources();
     }
@@ -196,7 +193,6 @@ namespace
 
     Logging::ConsoleLogger m_logger;
     CryptoNote::Currency m_currency;
-    ICoreStub coreStub;
     CryptoNote::RealTimeProvider m_time;
     TestTransactionGenerator txGenerator;
     TransactionValidator validator;
@@ -219,8 +215,10 @@ TEST_F(tx_pool, add_one_tx)
   test.construct(test.m_currency.minimumFee(), 1, tx);
 
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
+
+  uint32_t blockchainHeight = 0;
   
-  ASSERT_TRUE(test.pool.add_tx(tx, tvc, false));
+  ASSERT_TRUE(test.pool.add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_FALSE(tvc.m_verification_failed);
 };
 
@@ -235,7 +233,9 @@ TEST_F(tx_pool, take_tx)
 
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
 
-  ASSERT_TRUE(test.pool.add_tx(tx, tvc, false));
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(test.pool.add_tx(tx, tvc, false, blockchainHeight));
+
   ASSERT_FALSE(tvc.m_verification_failed);
 
   Transaction txOut;
@@ -256,13 +256,16 @@ TEST_F(tx_pool, double_spend_tx)
 
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
 
-  ASSERT_TRUE(test.pool.add_tx(tx, tvc, false));
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(test.pool.add_tx(tx, tvc, false, blockchainHeight));
+
   ASSERT_FALSE(tvc.m_verification_failed);
 
   test.txGenerator.rv_acc.generate(); // generate new receiver address
   test.construct(test.m_currency.minimumFee(), 1, tx_double);
 
-  ASSERT_FALSE(test.pool.add_tx(tx_double, tvc, false));
+  ASSERT_FALSE(test.pool.add_tx(tx_double, tvc, false, blockchainHeight));
+
   ASSERT_TRUE(tvc.m_verification_failed);
 }
 
@@ -285,7 +288,8 @@ TEST_F(tx_pool, DISABLED_fillblock_same_fee)
     txGenerator.construct(txGenerator.m_source_amount, fee, i, tx);
 
     tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-    ASSERT_TRUE(pool.add_tx(tx, tvc, false));
+    uint32_t blockchainHeight = 0;
+    ASSERT_TRUE(pool.add_tx(tx, tvc, false, blockchainHeight));
     ASSERT_TRUE(tvc.m_added_to_pool);
 
     transactions[getObjectHash(tx)] = std::move(txptr);
@@ -344,7 +348,8 @@ TEST_F(tx_pool, DISABLED_fillblock_same_size)
     txGenerator.construct(txGenerator.m_source_amount, fee + (fee * (i&1)), 1, tx);
 
     tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-    ASSERT_TRUE(pool.add_tx(tx, tvc, false));
+    uint32_t blockchainHeight = 0;
+    ASSERT_TRUE(pool.add_tx(tx, tvc, false, blockchainHeight));
     ASSERT_TRUE(tvc.m_added_to_pool);
 
     transactions[getObjectHash(tx)] = std::move(txptr);
@@ -391,7 +396,8 @@ TEST_F(tx_pool, cleanup_stale_tx)
     GenerateTransaction(currency, tx, fee, 1);
 
     tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-    ASSERT_TRUE(pool.add_tx(tx, tvc, false)); // main chain
+    uint32_t blockchainHeight = 0;
+    ASSERT_TRUE(pool.add_tx(tx, tvc, false, blockchainHeight)); // main chain
     ASSERT_TRUE(tvc.m_added_to_pool);
 
     // pool.timeProvider.timeNow += 60 * 60 * 2; // add 2 hours
@@ -403,7 +409,8 @@ TEST_F(tx_pool, cleanup_stale_tx)
     GenerateTransaction(currency, tx, fee, 1);
 
     tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-    ASSERT_TRUE(pool.add_tx(tx, tvc, true)); // alternative chain
+    uint32_t blockchainHeight = 0;
+    ASSERT_TRUE(pool.add_tx(tx, tvc, true, blockchainHeight)); // alternative chain
     ASSERT_TRUE(tvc.m_added_to_pool);
 
     // pool.timeProvider.timeNow += 60 * 60 * 2; // add 2 hours
@@ -435,7 +442,8 @@ TEST_F(tx_pool, add_tx_after_cleanup)
   GenerateTransaction(currency, tx, fee, 1);
 
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-  ASSERT_TRUE(pool.add_tx(tx, tvc, false)); // main chain
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(pool.add_tx(tx, tvc, false, blockchainHeight)); // main chain
   ASSERT_TRUE(tvc.m_added_to_pool);
 
   uint64_t cleanupTime = startTime + currency.mempoolTxLiveTime() + 1;
@@ -448,7 +456,7 @@ TEST_F(tx_pool, add_tx_after_cleanup)
   ASSERT_EQ(0, pool.get_transactions_count());
 
   // add again
-  ASSERT_TRUE(pool.add_tx(tx, tvc, false)); // main chain
+  ASSERT_TRUE(pool.add_tx(tx, tvc, false, blockchainHeight)); // main chain
   ASSERT_TRUE(tvc.m_added_to_pool);
 
   ASSERT_EQ(1, pool.get_transactions_count());
@@ -464,7 +472,8 @@ TEST_F(tx_pool, RecentlyDeletedTransactionCannotBeAddedToTxPoolAgain) {
   GenerateTransaction(currency, tx, currency.minimumFee(), 1);
 
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-  ASSERT_TRUE(pool.add_tx(tx, tvc, false));
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(pool.add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
 
   uint64_t deleteTime = startTime + currency.mempoolTxLiveTime() + 1;
@@ -473,7 +482,7 @@ TEST_F(tx_pool, RecentlyDeletedTransactionCannotBeAddedToTxPoolAgain) {
   ASSERT_EQ(0, pool.get_transactions_count());
 
   // Try to add tx again
-  ASSERT_TRUE(pool.add_tx(tx, tvc, false));
+  ASSERT_TRUE(pool.add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_FALSE(tvc.m_added_to_pool);
   ASSERT_FALSE(tvc.m_should_be_relayed);
   ASSERT_FALSE(tvc.m_verification_failed);
@@ -491,7 +500,8 @@ TEST_F(tx_pool, RecentlyDeletedTransactionCanBeAddedAgainAfterSomeTime) {
   GenerateTransaction(currency, tx, currency.minimumFee(), 1);
 
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-  ASSERT_TRUE(pool.add_tx(tx, tvc, false));
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(pool.add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
 
   uint64_t deleteTime = startTime + currency.mempoolTxLiveTime() + 1;
@@ -504,7 +514,7 @@ TEST_F(tx_pool, RecentlyDeletedTransactionCanBeAddedAgainAfterSomeTime) {
   pool.on_idle();
 
   // Try to add tx again
-  ASSERT_TRUE(pool.add_tx(tx, tvc, false));
+  ASSERT_TRUE(pool.add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
   ASSERT_TRUE(tvc.m_should_be_relayed);
   ASSERT_FALSE(tvc.m_verification_failed);
@@ -522,7 +532,8 @@ TEST_F(tx_pool, RecentlyDeletedTransactionCanBeAddedToTxPoolIfItIsReceivedInBloc
   GenerateTransaction(currency, tx, currency.minimumFee(), 1);
 
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-  ASSERT_TRUE(pool.add_tx(tx, tvc, false));
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(pool.add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
 
   uint64_t deleteTime = startTime + currency.mempoolTxLiveTime() + 1;
@@ -531,7 +542,7 @@ TEST_F(tx_pool, RecentlyDeletedTransactionCanBeAddedToTxPoolIfItIsReceivedInBloc
   ASSERT_EQ(0, pool.get_transactions_count());
 
   // Try to add tx again
-  ASSERT_TRUE(pool.add_tx(tx, tvc, true));
+  ASSERT_TRUE(pool.add_tx(tx, tvc, true, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
   ASSERT_TRUE(tvc.m_should_be_relayed);
   ASSERT_FALSE(tvc.m_verification_failed);
@@ -543,7 +554,7 @@ TEST_F(tx_pool, RecentlyDeletedTransactionCanBeAddedToTxPoolIfItIsReceivedInBloc
 TEST_F(tx_pool, OldTransactionIsDeletedDuringTxPoolInitialization) {
   TransactionValidator validator;
   FakeTimeProvider timeProvider;
-  std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, coreStub, timeProvider, logger));
+  std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, timeProvider, logger));
   ASSERT_TRUE(pool->init(m_configDir.string()));
 
   uint64_t startTime = timeProvider.now();
@@ -552,7 +563,8 @@ TEST_F(tx_pool, OldTransactionIsDeletedDuringTxPoolInitialization) {
   GenerateTransaction(currency, tx, currency.minimumFee(), 1);
 
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-  ASSERT_TRUE(pool->add_tx(tx, tvc, false));
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(pool->add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
 
   ASSERT_TRUE(pool->deinit());
@@ -561,7 +573,7 @@ TEST_F(tx_pool, OldTransactionIsDeletedDuringTxPoolInitialization) {
   uint64_t deleteTime = startTime + currency.mempoolTxLiveTime() + 1;
   timeProvider.timeNow = deleteTime;
 
-  pool.reset(new tx_memory_pool(currency, validator, coreStub, timeProvider, logger));
+  pool.reset(new tx_memory_pool(currency, validator, timeProvider, logger));
   ASSERT_TRUE(pool->init(m_configDir.string()));
   ASSERT_EQ(0, pool->get_transactions_count());
 }
@@ -569,7 +581,7 @@ TEST_F(tx_pool, OldTransactionIsDeletedDuringTxPoolInitialization) {
 TEST_F(tx_pool, TransactionThatWasDeletedLongAgoIsForgottenDuringTxPoolInitialization) {
   TransactionValidator validator;
   FakeTimeProvider timeProvider;
-  std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, coreStub, timeProvider, logger));
+  std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, timeProvider, logger));
   ASSERT_TRUE(pool->init(m_configDir.string()));
 
   uint64_t startTime = timeProvider.now();
@@ -578,7 +590,8 @@ TEST_F(tx_pool, TransactionThatWasDeletedLongAgoIsForgottenDuringTxPoolInitializ
   GenerateTransaction(currency, tx, currency.minimumFee(), 1);
 
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-  ASSERT_TRUE(pool->add_tx(tx, tvc, false));
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(pool->add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
 
   uint64_t deleteTime = startTime + currency.mempoolTxLiveTime() + 1;
@@ -592,11 +605,11 @@ TEST_F(tx_pool, TransactionThatWasDeletedLongAgoIsForgottenDuringTxPoolInitializ
   uint64_t forgetDeletedTxTime = deleteTime + currency.numberOfPeriodsToForgetTxDeletedFromPool() * currency.mempoolTxLiveTime() + 1;
   timeProvider.timeNow = forgetDeletedTxTime;
 
-  pool.reset(new tx_memory_pool(currency, validator, coreStub, timeProvider, logger));
+  pool.reset(new tx_memory_pool(currency, validator, timeProvider, logger));
   ASSERT_TRUE(pool->init(m_configDir.string()));
 
   // Try to add tx again
-  ASSERT_TRUE(pool->add_tx(tx, tvc, false));
+  ASSERT_TRUE(pool->add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
   ASSERT_TRUE(tvc.m_should_be_relayed);
   ASSERT_FALSE(tvc.m_verification_failed);
@@ -608,7 +621,7 @@ TEST_F(tx_pool, TransactionThatWasDeletedLongAgoIsForgottenDuringTxPoolInitializ
 TEST_F(tx_pool, RecentlyDeletedTxInfoIsSerializedAndDeserialized) {
   TransactionValidator validator;
   FakeTimeProvider timeProvider;
-  std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, coreStub, timeProvider, logger));
+  std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, timeProvider, logger));
   ASSERT_TRUE(pool->init(m_configDir.string()));
 
   uint64_t startTime = timeProvider.now();
@@ -617,7 +630,8 @@ TEST_F(tx_pool, RecentlyDeletedTxInfoIsSerializedAndDeserialized) {
   GenerateTransaction(currency, tx, currency.minimumFee(), 1);
 
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-  ASSERT_TRUE(pool->add_tx(tx, tvc, false));
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(pool->add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
 
   uint64_t deleteTime = startTime + currency.mempoolTxLiveTime() + 1;
@@ -627,14 +641,14 @@ TEST_F(tx_pool, RecentlyDeletedTxInfoIsSerializedAndDeserialized) {
 
   ASSERT_TRUE(pool->deinit());
 
-  pool.reset(new tx_memory_pool(currency, validator, coreStub, timeProvider, logger));
+  pool.reset(new tx_memory_pool(currency, validator, timeProvider, logger));
   ASSERT_TRUE(pool->init(m_configDir.string()));
 
   uint64_t timeBeforeCleanupDeletedTx = deleteTime + currency.numberOfPeriodsToForgetTxDeletedFromPool() * currency.mempoolTxLiveTime();
   timeProvider.timeNow = timeBeforeCleanupDeletedTx;
   pool->on_idle();
 
-  ASSERT_TRUE(pool->add_tx(tx, tvc, false));
+  ASSERT_TRUE(pool->add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_FALSE(tvc.m_added_to_pool);
   ASSERT_FALSE(tvc.m_should_be_relayed);
   ASSERT_FALSE(tvc.m_verification_failed);
@@ -646,7 +660,7 @@ TEST_F(tx_pool, RecentlyDeletedTxInfoIsSerializedAndDeserialized) {
   pool->on_idle();
 
   // Try to add tx again
-  ASSERT_TRUE(pool->add_tx(tx, tvc, false));
+  ASSERT_TRUE(pool->add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
   ASSERT_TRUE(tvc.m_should_be_relayed);
   ASSERT_FALSE(tvc.m_verification_failed);
@@ -658,14 +672,15 @@ TEST_F(tx_pool, RecentlyDeletedTxInfoIsSerializedAndDeserialized) {
 TEST_F(tx_pool, TxPoolAcceptsValidFusionTransaction) {
   TransactionValidator validator;
   FakeTimeProvider timeProvider;
-  std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, coreStub, timeProvider, logger));
+  std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, timeProvider, logger));
   ASSERT_TRUE(pool->init(m_configDir.string()));
 
   FusionTransactionBuilder builder(currency, 10 * currency.defaultDustThreshold());
   auto tx = builder.buildTx();
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
 
-  ASSERT_TRUE(pool->add_tx(tx, tvc, false));
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(pool->add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_TRUE(tvc.m_added_to_pool);
   ASSERT_TRUE(tvc.m_should_be_relayed);
   ASSERT_FALSE(tvc.m_verification_failed);
@@ -676,7 +691,7 @@ TEST_F(tx_pool, TxPoolAcceptsValidFusionTransaction) {
 TEST_F(tx_pool, DISABLED_TxPoolDoesNotAcceptInvalidFusionTransaction) {
   TransactionValidator validator;
   FakeTimeProvider timeProvider;
-  std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, coreStub, timeProvider, logger));
+  std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, timeProvider, logger));
   ASSERT_TRUE(pool->init(m_configDir.string()));
 
   FusionTransactionBuilder builder(currency, 10 * currency.defaultDustThreshold());
@@ -684,7 +699,8 @@ TEST_F(tx_pool, DISABLED_TxPoolDoesNotAcceptInvalidFusionTransaction) {
   auto tx = builder.buildTx();
   tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
 
-  ASSERT_FALSE(pool->add_tx(tx, tvc, false));
+  uint32_t blockchainHeight = 0;
+  ASSERT_FALSE(pool->add_tx(tx, tvc, false, blockchainHeight));
   ASSERT_FALSE(tvc.m_added_to_pool);
   ASSERT_FALSE(tvc.m_should_be_relayed);
   ASSERT_TRUE(tvc.m_verification_failed);
@@ -744,7 +760,7 @@ public:
   void doTest(size_t poolOrdinaryTxCount, size_t poolFusionTxCount, size_t expectedBlockOrdinaryTxCount, size_t expectedBlockFusionTxCount) {
     TransactionValidator validator;
     FakeTimeProvider timeProvider;
-    std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, coreStub, timeProvider, logger));
+    std::unique_ptr<tx_memory_pool> pool(new tx_memory_pool(currency, validator, timeProvider, logger));
     ASSERT_TRUE(pool->init(m_configDir.string()));
 
     std::unordered_map<Crypto::Hash, Transaction> ordinaryTxs;
@@ -759,14 +775,16 @@ public:
       fusionTxs.emplace(getObjectHash(tx), std::move(tx));
     }
 
+    uint32_t blockchainHeight = 0;
+
     for (auto pair : ordinaryTxs) {
       tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-      ASSERT_TRUE(pool->add_tx(pair.second, tvc, false));
+      ASSERT_TRUE(pool->add_tx(pair.second, tvc, false, blockchainHeight));
     }
 
     for (auto pair : fusionTxs) {
       tx_verification_context tvc = boost::value_initialized<tx_verification_context>();
-      ASSERT_TRUE(pool->add_tx(pair.second, tvc, false));
+      ASSERT_TRUE(pool->add_tx(pair.second, tvc, false, blockchainHeight));
     }
 
     Block block;

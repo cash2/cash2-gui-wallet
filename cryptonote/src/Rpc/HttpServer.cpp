@@ -1,4 +1,5 @@
 // Copyright (c) 2011-2016 The Cryptonote developers
+// Copyright (c) 2018-2019 The Karbo developers
 // Copyright (c) 2018-2019 The Cash2 developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -50,11 +51,17 @@ void HttpServer::acceptLoop() {
     BOOST_SCOPE_EXIT_ALL(this, &connection) { 
       m_connections.erase(&connection); };
 
-    auto addr = connection.getPeerAddressAndPort();
+    workingContextGroup.spawn(std::bind(&HttpServer::acceptLoop, this));
+
+    //auto addr = connection.getPeerAddressAndPort();
+    auto addr = std::pair<System::Ipv4Address, uint16_t>(static_cast<System::Ipv4Address>(0), 0);
+    try {
+      addr = connection.getPeerAddressAndPort();
+    } catch (std::runtime_error&) {
+      logger(WARNING) << "Could not get IP of connection";
+    }
 
     logger(DEBUGGING) << "Incoming connection from " << addr.first.toDottedDecimal() << ":" << addr.second;
-
-    workingContextGroup.spawn(std::bind(&HttpServer::acceptLoop, this));
 
     System::TcpStreambuf streambuf(connection);
     std::iostream stream(&streambuf);
@@ -63,6 +70,8 @@ void HttpServer::acceptLoop() {
     for (;;) {
       HttpRequest req;
       HttpResponse resp;
+      resp.addHeader("Access-Control-Allow-Origin", "*");
+      resp.addHeader("content-type", "application/json");
 
       parser.receiveRequest(stream, req);
       processRequest(req, resp);

@@ -51,14 +51,14 @@ std::error_code interpretResponseStatus(const std::string& status) {
 }
 
 NodeRpcProxy::NodeRpcProxy(const std::string& nodeHost, unsigned short nodePort) :
-    m_rpcTimeout(10000),
-    m_pullInterval(5000),
-    m_nodeHost(nodeHost),
-    m_nodePort(nodePort),
-    m_lastLocalBlockTimestamp(0),
-    m_connected(true),
-    m_minimalFee(CryptoNote::parameters::MINIMUM_FEE),
-    m_dustThreshold(CryptoNote::parameters::DEFAULT_DUST_THRESHOLD) {
+  m_rpcTimeout(10000),
+  m_pullInterval(5000),
+  m_nodeHost(nodeHost),
+  m_nodePort(nodePort),
+  m_lastLocalBlockTimestamp(0),
+  m_connected(true),
+  m_minimalFee(CryptoNote::parameters::MINIMUM_FEE) {
+  
   resetInternalState();
 }
 
@@ -234,8 +234,7 @@ void NodeRpcProxy::updateBlockchainStatus() {
     }
 
     updatePeerCount(getInfoResp.incoming_connections_count + getInfoResp.outgoing_connections_count);
-    m_minimalFee.store(getInfoResp.min_tx_fee, std::memory_order_relaxed);                                                                   
-    m_dustThreshold.store(getInfoResp.dust_threshold, std::memory_order_relaxed);                                                                   
+    m_minimalFee.store(getInfoResp.min_tx_fee, std::memory_order_relaxed);
   }
 
   if (m_connected != m_httpClient->isConnected()) {
@@ -308,10 +307,6 @@ uint64_t NodeRpcProxy::getLastLocalBlockTimestamp() const {
 
 uint64_t NodeRpcProxy::getMinimalFee() const {
   return m_minimalFee.load(std::memory_order_relaxed);
-}
-
-uint64_t NodeRpcProxy::getDustThreshold() const {
-  return m_dustThreshold.load(std::memory_order_relaxed);
 }
 
 void NodeRpcProxy::relayTransaction(const CryptoNote::Transaction& transaction, const Callback& callback) {

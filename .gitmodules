@@ -1,0 +1,6 @@
+[submodule "cash2"]
+	path = cash2
+	url = https://github.com/cash2/cash2.git
+[submodule "cryptonote"]
+	path = cryptonote
+	url = https://github.com/cash2/cash2.git

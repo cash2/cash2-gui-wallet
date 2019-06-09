@@ -10,7 +10,7 @@ Launch date : December 5, 2018 9:00 am EST
 
 ## Key highlights of Cash2
 - 9 second block time
-- 0 transaction fee
+- low transaction fees
 - No premine
 - BLAKE2b hashing algorithm
 - 15,000,000 maximum supply

@@ -27,6 +27,7 @@ public:
   size_t maxTxSize() const { return m_maxTxSize; }
   uint64_t publicAddressBase58Prefix() const { return m_publicAddressBase58Prefix; }
   size_t minedMoneyUnlockWindow() const { return m_minedMoneyUnlockWindow; }
+  size_t getMinedMoneyUnlockWindow(uint32_t height) const;
 
   size_t timestampCheckWindow() const { return m_timestampCheckWindow; }
   uint64_t blockFutureTimeLimit() const { return m_blockFutureTimeLimit; }
@@ -89,11 +90,11 @@ public:
 
   bool constructMinerTx2(uint32_t height, uint64_t alreadyGeneratedCoins, size_t currentBlockSize, uint64_t fee, const AccountPublicAddress& minerAddress, Transaction& tx, const BinaryArray& extraNonce, size_t maxOuts) const;
 
-  bool isFusionTransaction(const Transaction& transaction) const;
-  bool isFusionTransaction(const Transaction& transaction, size_t size) const;
-  bool isFusionTransaction(const std::vector<uint64_t>& inputsAmounts, const std::vector<uint64_t>& outputsAmounts, size_t size) const;
-  bool isAmountApplicableInFusionTransactionInput(uint64_t amount, uint64_t threshold) const;
-  bool isAmountApplicableInFusionTransactionInput(uint64_t amount, uint64_t threshold, uint8_t& amountPowerOfTen) const;
+  bool isFusionTransaction(const Transaction& transaction, uint32_t height) const;
+  bool isFusionTransaction(const Transaction& transaction, size_t size, uint32_t height) const;
+  bool isFusionTransaction(const std::vector<uint64_t>& inputsAmounts, const std::vector<uint64_t>& outputsAmounts, size_t size, uint32_t height) const;
+  bool isAmountApplicableInFusionTransactionInput(uint64_t amount, uint64_t threshold, uint32_t height) const;
+  bool isAmountApplicableInFusionTransactionInput(uint64_t amount, uint64_t threshold, uint8_t& amountPowerOfTen, uint32_t height) const;
 
   std::string accountAddressAsString(const AccountBase& account) const;
   std::string accountAddressAsString(const AccountPublicAddress& accountPublicAddress) const;

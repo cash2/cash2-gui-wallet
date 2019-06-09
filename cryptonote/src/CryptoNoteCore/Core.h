@@ -81,7 +81,6 @@ namespace CryptoNote {
     virtual std::error_code executeLocked(const std::function<std::error_code()>& func) override;
     virtual uint64_t getMinimalFeeForHeight(uint32_t height) override;
     virtual uint64_t getMinimalFee() override;
-    virtual uint64_t getDustThreshold() override;
     virtual uint32_t get_current_blockchain_height() override;
      
     virtual bool addMessageQueue(MessageQueue<BlockchainMessage>& messageQueue) override;
