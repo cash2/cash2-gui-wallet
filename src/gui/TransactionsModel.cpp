@@ -215,7 +215,7 @@ QVariant TransactionsModel::getDisplayRole(const QModelIndex& _index) const {
     QString amountStr = CurrencyAdapter::instance().formatAmount(qAbs(amount));
     QString amountMinusFeeStr = CurrencyAdapter::instance().formatAmount(qAbs(amount) - qAbs(fee));
 
-    return (amount < 0 ? "- " + amountMinusFeeStr : "+ " + amountStr);
+    return (amount < 0 ? "- " + amountMinusFeeStr : "+ " + amountMinusFeeStr);
   }
 
   case COLUMN_AMOUNT_WITH_FEE: {

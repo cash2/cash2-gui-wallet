@@ -1925,7 +1925,8 @@ TEST_F(WalletApi, DISABLED_createFusionTransactionCreatesValidFusionTransactionW
 
   ASSERT_NE(WALLET_INVALID_TRANSACTION_ID, wallet.createFusionTransaction(FUSION_THRESHOLD, 0));
   ASSERT_TRUE(catchNode.caught);
-  ASSERT_TRUE(currency.isFusionTransaction(catchNode.transaction));
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(currency.isFusionTransaction(catchNode.transaction, blockchainHeight));
 
   wallet.shutdown();
 }
@@ -1941,7 +1942,9 @@ TEST_F(WalletApi, DISABLED_createFusionTransactionCreatesValidFusionTransactionW
 
   ASSERT_NE(WALLET_INVALID_TRANSACTION_ID, wallet.createFusionTransaction(FUSION_THRESHOLD, 2));
   ASSERT_TRUE(catchNode.caught);
-  ASSERT_TRUE(currency.isFusionTransaction(catchNode.transaction));
+
+  uint32_t blockchainHeight = 0;
+  ASSERT_TRUE(currency.isFusionTransaction(catchNode.transaction, blockchainHeight));
 
   wallet.shutdown();
 }
@@ -2054,13 +2057,16 @@ TEST_F(WalletApi, DISABLED_fusionManagerEstimate) {
   IFusionManager::EstimateResult expectedResult = {0, tx.outputs.size()};
   size_t maxOutputIndex = 0;
   uint64_t maxOutputAmount = 0;
+
+  uint32_t blockchainHeight = 0;
+
   for (size_t i = 0; i < tx.outputs.size(); ++i) {
     if (tx.outputs[i].amount > maxOutputAmount) {
       maxOutputAmount = tx.outputs[i].amount;
       maxOutputIndex = i;
     }
 
-    if (currency.isAmountApplicableInFusionTransactionInput(tx.outputs[i].amount, tx.outputs[i].amount + 1)) {
+    if (currency.isAmountApplicableInFusionTransactionInput(tx.outputs[i].amount, tx.outputs[i].amount + 1, blockchainHeight)) {
       ++expectedResult.fusionReadyCount;
     }
   }

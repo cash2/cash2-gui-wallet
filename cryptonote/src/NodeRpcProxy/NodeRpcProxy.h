@@ -54,7 +54,6 @@ public:
   virtual uint32_t getKnownBlockCount() const override;
   virtual uint64_t getLastLocalBlockTimestamp() const override;
   virtual uint64_t getMinimalFee() const override;
-  virtual uint64_t getDustThreshold() const override;
 
   virtual void relayTransaction(const CryptoNote::Transaction& transaction, const Callback& callback) override;
   virtual void getRandomOutsByAmounts(std::vector<uint64_t>&& amounts, uint64_t outsCount, std::vector<COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& result, const Callback& callback) override;
@@ -137,7 +136,6 @@ private:
   std::atomic<uint32_t> m_nodeHeight;
   std::atomic<uint32_t> m_networkHeight;
   std::atomic<uint64_t> m_minimalFee;
-  std::atomic<uint64_t> m_dustThreshold;
 
   //protect it with mutex if decided to add worker threads
   Crypto::Hash m_lastKnowHash;

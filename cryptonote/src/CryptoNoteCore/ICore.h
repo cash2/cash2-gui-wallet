@@ -102,7 +102,6 @@ public:
   virtual bool getTransactionsByPaymentId(const Crypto::Hash& paymentId, std::vector<Transaction>& transactions) = 0;
   virtual uint64_t getMinimalFeeForHeight(uint32_t height) = 0;
   virtual uint64_t getMinimalFee() = 0;
-  virtual uint64_t getDustThreshold() = 0;
   virtual uint32_t get_current_blockchain_height() = 0;
 
   virtual std::unique_ptr<IBlock> getBlock(const Crypto::Hash& blocksId) = 0;

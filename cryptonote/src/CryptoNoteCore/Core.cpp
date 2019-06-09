@@ -58,7 +58,7 @@ private:
 core::core(const Currency& currency, i_cryptonote_protocol* pprotocol, Logging::ILogger& logger) :
 m_currency(currency),
 logger(logger, "core"),
-m_mempool(currency, m_blockchain, *this, m_timeProvider, logger),
+m_mempool(currency, m_blockchain, m_timeProvider, logger),
 m_blockchain(currency, m_mempool, logger),
 m_miner(new miner(currency, *this, logger)),
 m_starter_message_showed(false) {
@@ -213,9 +213,9 @@ bool core::handle_incoming_tx(const BinaryArray& tx_blob, tx_verification_contex
 
   // try to find a block that contains this transaction
   // if a block is found, get its block height
-  bool txFound = getBlockContainingTx(tx_hash, blockIdIgnore, blockHeight);
+  bool blockFound = getBlockContainingTx(tx_hash, blockIdIgnore, blockHeight);
   
-  if (!txFound)
+  if (!blockFound)
   {
     blockHeight = m_blockchain.getCurrentBlockchainHeight();
   }
@@ -349,16 +349,8 @@ bool core::check_tx_fee(const Transaction& tx, size_t blobSize, tx_verification_
   }
 
 	const uint64_t fee = inputs_amount - outputs_amount;
-  bool isFusionTransaction = fee == 0 && m_currency.isFusionTransaction(tx, blobSize);
+  bool isFusionTransaction = fee == 0 && m_currency.isFusionTransaction(tx, blobSize, blockHeight);
   if (!keptByBlock && !isFusionTransaction) {
-    if (blockHeight < CryptoNote::parameters::SOFT_FORK_HEIGHT_1 && fee < CryptoNote::parameters::MINIMUM_FEE_1)
-    {
-      logger(INFO) << "transaction fee is not enough: " << m_currency.formatAmount(fee) <<
-      ", minimum fee: " << m_currency.formatAmount(CryptoNote::parameters::MINIMUM_FEE_1);
-      tvc.m_verification_failed = true;
-      tvc.m_tx_fee_too_small = true;
-      return false;
-    }
 
     if (blockHeight >= CryptoNote::parameters::SOFT_FORK_HEIGHT_1 && fee < CryptoNote::parameters::MINIMUM_FEE_2)
     {
@@ -426,7 +418,9 @@ bool core::add_new_tx(const Transaction& tx, const Crypto::Hash& tx_hash, size_t
     return true;
   }
 
-  return m_mempool.add_tx(tx, tx_hash, blob_size, tvc, kept_by_block);
+  uint32_t blockchainHeight = m_blockchain.getCurrentBlockchainHeight();
+
+  return m_mempool.add_tx(tx, tx_hash, blob_size, tvc, kept_by_block, blockchainHeight);
 }
 
 bool core::get_block_template(Block& b, const AccountPublicAddress& adr, difficulty_type& diffic, uint32_t& blockchainHeight, const BinaryArray& ex_nonce) {
@@ -493,6 +487,8 @@ bool core::get_block_template(Block& b, const AccountPublicAddress& adr, difficu
     return false; 
   }
 
+  // The merkle root must be calculated here after the coinbase transaction and mempool transaction hashes have been added to the block because the coinbase transaction and block transaction hashes are used to calculate the merkle root
+  // The merkle root is added to the block here because if we are mining in simplewallet the merkle root is not calculated from the coinbase transaction and block transaction hashes like it is in the mining pool
   b.merkleRoot = get_tx_tree_hash(b);
 
   return true;
@@ -1045,10 +1041,6 @@ uint64_t core::getMinimalFee() {
 
 uint64_t core::getMinimalFeeForHeight(uint32_t height) {
 	return m_blockchain.getMinimalFee(height);
-}
-
-uint64_t core::getDustThreshold() {
-  return m_blockchain.getDustThreshold();
 }
 
 std::error_code core::executeLocked(const std::function<std::error_code()>& func) {

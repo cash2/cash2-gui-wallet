@@ -70,7 +70,6 @@ public:
   virtual uint32_t getKnownBlockCount() const = 0;
   virtual uint64_t getLastLocalBlockTimestamp() const = 0;
   virtual uint64_t getMinimalFee() const = 0;
-  virtual uint64_t getDustThreshold() const = 0;
 
   virtual void relayTransaction(const Transaction& transaction, const Callback& callback) = 0;
   virtual void getRandomOutsByAmounts(std::vector<uint64_t>&& amounts, uint64_t outsCount, std::vector<CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& result, const Callback& callback) = 0;

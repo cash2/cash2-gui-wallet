@@ -91,19 +91,17 @@ namespace CryptoNote {
   tx_memory_pool::tx_memory_pool(
     const CryptoNote::Currency& currency, 
     CryptoNote::ITransactionValidator& validator,
-    CryptoNote::ICore& core,
     CryptoNote::ITimeProvider& timeProvider,
     Logging::ILogger& log) :
     m_currency(currency),
     m_validator(validator),
-    m_core(core),
     m_timeProvider(timeProvider), 
     m_txCheckInterval(60, timeProvider),
     m_fee_index(boost::get<1>(m_transactions)),
     logger(log, "txpool") {
   }
   //---------------------------------------------------------------------------------
-  bool tx_memory_pool::add_tx(const Transaction &tx, /*const Crypto::Hash& tx_prefix_hash,*/ const Crypto::Hash &id, size_t blobSize, tx_verification_context& tvc, bool keptByBlock) {
+  bool tx_memory_pool::add_tx(const Transaction &tx, /*const Crypto::Hash& tx_prefix_hash,*/ const Crypto::Hash &id, size_t blobSize, tx_verification_context& tvc, bool keptByBlock, uint32_t blockchainHeight) {
     if (!check_inputs_types_supported(tx)) {
       tvc.m_verification_failed = true;
       return false;
@@ -125,7 +123,7 @@ namespace CryptoNote {
     }
 
     const uint64_t fee = inputs_amount - outputs_amount;
-    bool isFusionTransaction = fee == 0 && m_currency.isFusionTransaction(tx, blobSize);
+    bool isFusionTransaction = fee == 0 && m_currency.isFusionTransaction(tx, blobSize, blockchainHeight);
 
     //check key images for transaction if it is not kept by block
     if (!keptByBlock) {
@@ -207,8 +205,6 @@ namespace CryptoNote {
 
     tvc.m_added_to_pool = true;
 
-    uint32_t blockchainHeight = m_core.get_current_blockchain_height();
-
     if (blockchainHeight < CryptoNote::parameters::SOFT_FORK_HEIGHT_1)
     {
       tvc.m_should_be_relayed = inputsValid;
@@ -229,11 +225,11 @@ namespace CryptoNote {
   }
 
   //---------------------------------------------------------------------------------
-  bool tx_memory_pool::add_tx(const Transaction &tx, tx_verification_context& tvc, bool kept_by_block) {
+  bool tx_memory_pool::add_tx(const Transaction &tx, tx_verification_context& tvc, bool kept_by_block, uint32_t blockchainHeight) {
     Crypto::Hash h = NULL_HASH;
     size_t blobSize = 0;
     getObjectHash(tx, h, blobSize);
-    return add_tx(tx, h, blobSize, tvc, kept_by_block);
+    return add_tx(tx, h, blobSize, tvc, kept_by_block, blockchainHeight);
   }
   //---------------------------------------------------------------------------------
   bool tx_memory_pool::take_tx(const Crypto::Hash &id, Transaction &tx, size_t& blobSize, uint64_t& fee) {

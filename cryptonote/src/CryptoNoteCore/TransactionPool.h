@@ -76,7 +76,6 @@ namespace CryptoNote {
     tx_memory_pool(
       const CryptoNote::Currency& currency, 
       CryptoNote::ITransactionValidator& validator,
-      CryptoNote::ICore& core,
       CryptoNote::ITimeProvider& timeProvider,
       Logging::ILogger& log);
 
@@ -88,8 +87,8 @@ namespace CryptoNote {
     bool deinit();
 
     bool have_tx(const Crypto::Hash &id) const;
-    bool add_tx(const Transaction &tx, const Crypto::Hash &id, size_t blobSize, tx_verification_context& tvc, bool kept_by_block);
-    bool add_tx(const Transaction &tx, tx_verification_context& tvc, bool kept_by_block);
+    bool add_tx(const Transaction &tx, const Crypto::Hash &id, size_t blobSize, tx_verification_context& tvc, bool kept_by_block, uint32_t blockchainHeight);
+    bool add_tx(const Transaction &tx, tx_verification_context& tvc, bool kept_by_block, uint32_t blockchainHeight);
     //gets tx and remove it from pool
     bool take_tx(const Crypto::Hash &id, Transaction &tx, size_t& blobSize, uint64_t& fee);
 
@@ -193,7 +192,6 @@ namespace CryptoNote {
 
     Tools::ObserverManager<ITxPoolObserver> m_observerManager;
     const CryptoNote::Currency& m_currency;
-    CryptoNote::ICore& m_core;
     OnceInTimeInterval m_txCheckInterval;
     mutable std::recursive_mutex m_transactions_lock;
     key_images_container m_spent_key_images;

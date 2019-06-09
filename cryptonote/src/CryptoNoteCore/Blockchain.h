@@ -79,7 +79,6 @@ namespace CryptoNote {
     Crypto::Hash getTailId(uint32_t& height);
     difficulty_type getDifficultyForNextBlock();
     uint64_t getMinimalFee(uint32_t height);
-    uint64_t getDustThreshold();
     uint64_t getCoinsInCirculation();
     bool addNewBlock(const Block& bl_, block_verification_context& bvc);
     bool resetAndSetGenesisBlock(const Block& b);

@@ -752,7 +752,7 @@ void WalletGreen::prepareTransaction(std::vector<WalletOuts>&& wallets,
 
   std::vector<OutputToTransfer> selectedTransfers;
 
-  uint64_t dustThreshold = m_node.getDustThreshold();
+  uint64_t dustThreshold = m_currency.getDustThreshold(m_node.getLastKnownBlockHeight());
 
   uint64_t foundMoney = selectTransfers(preparedTransaction.neededMoney, mixIn == 0, dustThreshold, std::move(wallets), selectedTransfers);
 
@@ -2117,8 +2117,10 @@ size_t WalletGreen::createFusionTransaction(uint64_t threshold, uint64_t mixin) 
 
   const size_t MAX_FUSION_OUTPUT_COUNT = 4;
 
-  if (threshold <= m_currency.defaultDustThreshold()) {
-    throw std::runtime_error("Threshold must be greater than " + std::to_string(m_currency.defaultDustThreshold()));
+  uint64_t dustThreshold = m_currency.getDustThreshold(m_node.getLastKnownBlockHeight());
+
+  if (threshold <= dustThreshold) {
+    throw std::runtime_error("Threshold must be greater than " + std::to_string(dustThreshold));
   }
 
   if (m_walletsContainer.get<RandomAccessIndex>().size() == 0) {
@@ -2250,7 +2252,7 @@ bool WalletGreen::isFusionTransaction(const WalletTransaction& walletTx) const {
   if (outputsSum != inputsSum || outputsSum != txInfo.totalAmountOut || inputsSum != txInfo.totalAmountIn) {
     return false;
   } else {
-    return m_currency.isFusionTransaction(inputsAmounts, outputsAmounts, 0); //size = 0 here because can't get real size of tx in wallet.
+    return m_currency.isFusionTransaction(inputsAmounts, outputsAmounts, 0, m_node.getLastKnownBlockHeight()); //size = 0 here because can't get real size of tx in wallet.
   }
 }
 
@@ -2265,7 +2267,7 @@ IFusionManager::EstimateResult WalletGreen::estimate(uint64_t threshold) const {
   for (size_t walletIndex = 0; walletIndex < walletOuts.size(); ++walletIndex) {
     for (auto& out : walletOuts[walletIndex].outs) {
       uint8_t powerOfTen = 0;
-      if (m_currency.isAmountApplicableInFusionTransactionInput(out.amount, threshold, powerOfTen)) {
+      if (m_currency.isAmountApplicableInFusionTransactionInput(out.amount, threshold, powerOfTen, m_node.getLastKnownBlockHeight())) {
         assert(powerOfTen < std::numeric_limits<uint64_t>::digits10 + 1);
         bucketSizes[powerOfTen]++;
       }
@@ -2291,7 +2293,7 @@ std::vector<WalletGreen::OutputToTransfer> WalletGreen::pickRandomFusionInputs(u
   for (size_t walletIndex = 0; walletIndex < walletOuts.size(); ++walletIndex) {
     for (auto& out : walletOuts[walletIndex].outs) {
       uint8_t powerOfTen = 0;
-      if (m_currency.isAmountApplicableInFusionTransactionInput(out.amount, threshold, powerOfTen)) {
+      if (m_currency.isAmountApplicableInFusionTransactionInput(out.amount, threshold, powerOfTen, m_node.getLastKnownBlockHeight())) {
         allFusionReadyOuts.push_back({std::move(out), walletOuts[walletIndex].wallet});
         assert(powerOfTen < std::numeric_limits<uint64_t>::digits10 + 1);
         bucketSizes[powerOfTen]++;

@@ -16,8 +16,12 @@ const uint64_t DIFFICULTY_TARGET                             = 9; // seconds
 const uint64_t CRYPTONOTE_MAX_BLOCK_NUMBER                   = 500000000;
 const size_t   CRYPTONOTE_MAX_BLOCK_BLOB_SIZE                = 500000000;
 const size_t   CRYPTONOTE_MAX_TX_SIZE                        = 1000000000;
-const uint64_t CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX       = 0x6; // all Cash2 addresses start with a '2' 
-const size_t   CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW          = 60;
+const uint64_t CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX       = 0x6; // all Cash2 addresses start with a '2'
+
+const size_t   CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW_1        = 60;
+const size_t   CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW_2        = 400;
+const size_t   CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW          = CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW_2;
+
 const uint64_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT            = 60 * 60 * 2;
 const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW             = 60;
 const uint64_t MONEY_SUPPLY                                  = UINT64_C(15000000000000000); // 15,000,000.000000000 total coins
@@ -30,13 +34,14 @@ const size_t   CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE     = 200 * 1024; //siz
 const size_t   CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE        = 600;
 const size_t   CRYPTONOTE_DISPLAY_DECIMAL_POINT              = 9; // number of digits after decimal point
 
-const uint64_t MINIMUM_FEE_1                                 = 0; // free transactions
+const uint64_t MINIMUM_FEE_1                                 = UINT64_C(0); // free transactions
 const uint64_t MINIMUM_FEE_2                                 = UINT64_C(10000000); // 0.01
 const uint64_t MINIMUM_FEE                                   = MINIMUM_FEE_2;
 
 const uint64_t DEFAULT_DUST_THRESHOLD_1                      = MINIMUM_FEE_1;
 const uint64_t DEFAULT_DUST_THRESHOLD_2                      = MINIMUM_FEE_2;
-const uint64_t DEFAULT_DUST_THRESHOLD                        = DEFAULT_DUST_THRESHOLD_2;
+const uint64_t DEFAULT_DUST_THRESHOLD_3                      = UINT64_C(0);
+const uint64_t DEFAULT_DUST_THRESHOLD                        = DEFAULT_DUST_THRESHOLD_3;
 
 const uint64_t MAX_MIXIN                                     = 3;
 const size_t   DIFFICULTY_WINDOW                             = 3600; // blocks, number of blocks expected in 9 hours
@@ -70,8 +75,15 @@ const char     MINER_CONFIG_FILE_NAME[]                      = "miner_conf.json"
 // Therefore, a hard fork did not really occur at height 230,500
 // const uint64_t HARD_FORK_HEIGHT_1                            = 230500;
 
+// HARD_FORK_HEIGHT_2 fixes integer overflow problem with calculating the next block diffiuclty using cummulative difficulties
 const uint64_t HARD_FORK_HEIGHT_2                            = 420016;
+
+// SOFT_FORK_HEIGHT_1 increases the minimum fee from 0 to 0.01 and also adds other measures to prevent blockchain spamming
 const uint64_t SOFT_FORK_HEIGHT_1                            = 1100000;
+
+// HARD_FORK_HEIGHT_3 increases the time needed to unlock a mined block from 60 blocks to 400 blocks
+// Also fixes missed default dust threshold calculations based on blockchain height in constructMinerTx1(), constructMinerTx2(), isFusionTransaction() and isAmountApplicableInFusionTransactionInput() in Currency.cpp
+const uint64_t HARD_FORK_HEIGHT_3                            = 1700000;
 
 } // end namespace parameters
 
@@ -99,8 +111,8 @@ const char     P2P_STAT_TRUSTED_PUB_KEY[]                    = "";
 
 //seed nodes
 const std::initializer_list<const char*> SEED_NODES = {
-  "seed1.cash2.org:12277",
-  "seed2.cash2.org:12279",
+  "seed1.cash2.org:12275",
+  "seed2.cash2.org:12275",
   "seed3.cash2.org:12275",
 };
 

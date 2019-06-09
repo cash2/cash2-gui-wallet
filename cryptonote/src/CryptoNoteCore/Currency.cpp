@@ -196,7 +196,7 @@ bool Currency::constructMinerTx1(uint32_t height, size_t medianSize, uint64_t al
   }
 
   std::vector<uint64_t> outAmounts;
-  decompose_amount_into_digits(blockReward, m_defaultDustThreshold,
+  decompose_amount_into_digits(blockReward, getDustThreshold(height),
     [&outAmounts](uint64_t a_chunk) { outAmounts.push_back(a_chunk); },
     [&outAmounts](uint64_t a_dust) { outAmounts.push_back(a_dust); });
 
@@ -245,8 +245,11 @@ bool Currency::constructMinerTx1(uint32_t height, size_t medianSize, uint64_t al
   }
 
   tx.version = CURRENT_TRANSACTION_VERSION;
+
   //lock
-  tx.unlockTime = height + m_minedMoneyUnlockWindow;
+  size_t minedMoneyUnlockWindow = getMinedMoneyUnlockWindow(height);
+  tx.unlockTime = height + minedMoneyUnlockWindow;
+
   tx.inputs.push_back(in);
   return true;
 }
@@ -276,7 +279,7 @@ bool Currency::constructMinerTx2(uint32_t height, uint64_t alreadyGeneratedCoins
   }
 
   std::vector<uint64_t> outAmounts;
-  decompose_amount_into_digits(blockReward, m_defaultDustThreshold,
+  decompose_amount_into_digits(blockReward, getDustThreshold(height),
     [&outAmounts](uint64_t a_chunk) { outAmounts.push_back(a_chunk); },
     [&outAmounts](uint64_t a_dust) { outAmounts.push_back(a_dust); });
 
@@ -325,13 +328,16 @@ bool Currency::constructMinerTx2(uint32_t height, uint64_t alreadyGeneratedCoins
   }
 
   tx.version = CURRENT_TRANSACTION_VERSION;
+
   //lock
-  tx.unlockTime = height + m_minedMoneyUnlockWindow;
+  size_t minedMoneyUnlockWindow = getMinedMoneyUnlockWindow(height);
+  tx.unlockTime = height + minedMoneyUnlockWindow;
+
   tx.inputs.push_back(in);
   return true;
 }
 
-bool Currency::isFusionTransaction(const std::vector<uint64_t>& inputsAmounts, const std::vector<uint64_t>& outputsAmounts, size_t size) const {
+bool Currency::isFusionTransaction(const std::vector<uint64_t>& inputsAmounts, const std::vector<uint64_t>& outputsAmounts, size_t size, uint32_t height) const {
   if (size > fusionTxMaxSize()) {
     return false;
   }
@@ -344,9 +350,11 @@ bool Currency::isFusionTransaction(const std::vector<uint64_t>& inputsAmounts, c
     return false;
   }
 
+  uint64_t dustThreshold = getDustThreshold(height);
+
   uint64_t inputAmount = 0;
   for (auto amount: inputsAmounts) {
-    if (amount < defaultDustThreshold()) {
+    if (amount < dustThreshold) {
       return false;
     }
 
@@ -355,13 +363,13 @@ bool Currency::isFusionTransaction(const std::vector<uint64_t>& inputsAmounts, c
 
   std::vector<uint64_t> expectedOutputsAmounts;
   expectedOutputsAmounts.reserve(outputsAmounts.size());
-  decomposeAmount(inputAmount, defaultDustThreshold(), expectedOutputsAmounts);
+  decomposeAmount(inputAmount, dustThreshold, expectedOutputsAmounts);
   std::sort(expectedOutputsAmounts.begin(), expectedOutputsAmounts.end());
 
   return expectedOutputsAmounts == outputsAmounts;
 }
 
-bool Currency::isFusionTransaction(const Transaction& transaction, size_t size) const {
+bool Currency::isFusionTransaction(const Transaction& transaction, size_t size, uint32_t height) const {
   assert(getObjectBinarySize(transaction) == size);
 
   std::vector<uint64_t> outputsAmounts;
@@ -370,24 +378,24 @@ bool Currency::isFusionTransaction(const Transaction& transaction, size_t size) 
     outputsAmounts.push_back(output.amount);
   }
 
-  return isFusionTransaction(getInputsAmounts(transaction), outputsAmounts, size);
+  return isFusionTransaction(getInputsAmounts(transaction), outputsAmounts, size, height);
 }
 
-bool Currency::isFusionTransaction(const Transaction& transaction) const {
-  return isFusionTransaction(transaction, getObjectBinarySize(transaction));
+bool Currency::isFusionTransaction(const Transaction& transaction, uint32_t height) const {
+  return isFusionTransaction(transaction, getObjectBinarySize(transaction), height);
 }
 
-bool Currency::isAmountApplicableInFusionTransactionInput(uint64_t amount, uint64_t threshold) const {
+bool Currency::isAmountApplicableInFusionTransactionInput(uint64_t amount, uint64_t threshold, uint32_t height) const {
   uint8_t ignore;
-  return isAmountApplicableInFusionTransactionInput(amount, threshold, ignore);
+  return isAmountApplicableInFusionTransactionInput(amount, threshold, ignore, height);
 }
 
-bool Currency::isAmountApplicableInFusionTransactionInput(uint64_t amount, uint64_t threshold, uint8_t& amountPowerOfTen) const {
+bool Currency::isAmountApplicableInFusionTransactionInput(uint64_t amount, uint64_t threshold, uint8_t& amountPowerOfTen, uint32_t height) const {
   if (amount >= threshold) {
     return false;
   }
 
-  if (amount < defaultDustThreshold()) {
+  if (amount < getDustThreshold(height)) {
     return false;
   }
 
@@ -612,7 +620,6 @@ uint64_t Currency::getMinimalFee(uint32_t height) const
   }
   
   return parameters::MINIMUM_FEE_2;
-
 }
 
 uint64_t Currency::getDustThreshold(uint32_t height) const
@@ -622,8 +629,22 @@ uint64_t Currency::getDustThreshold(uint32_t height) const
     return parameters::DEFAULT_DUST_THRESHOLD_1;
   }
   
-  return parameters::DEFAULT_DUST_THRESHOLD_2;
+  if (height < parameters::HARD_FORK_HEIGHT_3)
+  {
+    return parameters::DEFAULT_DUST_THRESHOLD_2;
+  }
+  
+  return parameters::DEFAULT_DUST_THRESHOLD_3;
+}
 
+size_t Currency::getMinedMoneyUnlockWindow(uint32_t height) const
+{
+  if (height < parameters::HARD_FORK_HEIGHT_3)
+  {
+    return parameters::CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW_1;
+  }
+  
+  return parameters::CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW_2;
 }
 
 size_t Currency::getApproximateMaximumInputCount(size_t transactionSize, size_t outputCount, size_t mixinCount) const {

@@ -80,7 +80,7 @@ void MainWindow::connectToSignals() {
 }
 
 void MainWindow::initUi() {
-  setWindowTitle(QString("Cash2 Wallet 4.2.1"));
+  setWindowTitle(QString("Cash2 Wallet 5.0"));
 #ifdef Q_OS_WIN32
   if (QSystemTrayIcon::isSystemTrayAvailable()) {
     m_trayIcon = new QSystemTrayIcon(QPixmap(":images/cryptonote"), this);

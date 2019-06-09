@@ -428,11 +428,6 @@ uint64_t InProcessNode::getMinimalFee() const {
   return core.getMinimalFee();
 }
 
-uint64_t InProcessNode::getDustThreshold() const {
-  std::unique_lock<std::mutex> lock(mutex);
-  return core.getDustThreshold();
-}
-
 void InProcessNode::peerCountUpdated(size_t count) {
   observerManager.notify(&INodeObserver::peerCountUpdated, count);
 }
