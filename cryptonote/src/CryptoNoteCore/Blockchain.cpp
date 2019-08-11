@@ -1066,6 +1066,14 @@ bool Blockchain::handle_alternative_block(const Block& b, const Crypto::Hash& id
     bei.bl = b;
     bei.height = static_cast<uint32_t>(alt_chain.size() ? it_prev->second.height + 1 : mainPrevHeight + 1);
 
+    // Do no allow new alternative blocks to be added to the blockchain prior to HARD_FORK_HEIGHT_2 if the blockchain size is greater than HARD_FORK_HEIGHT_2
+    if (bei.height < parameters::HARD_FORK_HEIGHT_2 && getCurrentBlockchainHeight() >= parameters::HARD_FORK_HEIGHT_2)
+    {
+      logger(INFO, BRIGHT_WHITE) << "Cannot add alternative block prior to HARD_FORK_HEIGHT_2 if main chain size is greater than HARD_FORK_HEIGHT_2";
+      bvc.m_verification_failed = true;
+      return false;
+    }
+
     bool is_a_checkpoint;
     if (!m_checkpoints.check_block(bei.height, id, is_a_checkpoint)) {
       logger(ERROR, BRIGHT_RED) <<
@@ -1144,7 +1152,8 @@ bool Blockchain::handle_alternative_block(const Block& b, const Crypto::Hash& id
         bvc.m_verification_failed = true;
       }
       return r;
-    } else if (m_blocks.back().cumulative_difficulty < bei.cumulative_difficulty) //check if difficulty bigger then in main chain
+    }
+    else if (m_blocks.back().cumulative_difficulty < bei.cumulative_difficulty) //check if difficulty bigger then in main chain
     {
       //do reorganize!
       logger(INFO, BRIGHT_GREEN) <<
