@@ -454,11 +454,23 @@ void WalletAdapter::updateBlockStatusText() {
   const QDateTime blockTime = NodeAdapter::instance().getLastLocalBlockTimestamp();
   quint64 blockAge = blockTime.msecsTo(currentTime);
   const QString warningString = blockTime.msecsTo(currentTime) < LAST_BLOCK_INFO_WARNING_INTERVAL ? "" :
-    QString("  Warning: last block was received %1 hours %2 minutes ago").arg(blockAge / MSECS_IN_HOUR).arg(blockAge % MSECS_IN_HOUR / MSECS_IN_MINUTE);
-  Q_EMIT walletStateChangedSignal(QString(tr("Wallet synchronized. Height: %1 %3")).
-    arg(QLocale(QLocale::English).toString(NodeAdapter::instance().getLastLocalBlockHeight())).
-    // arg(QLocale(QLocale::English).toString(blockTime, "dd MMM yyyy, HH:mm:ss")).
-    arg(warningString));
+    QString("Warning: last block was received %1 hours %2 minutes ago").arg(blockAge / MSECS_IN_HOUR).arg(blockAge % MSECS_IN_HOUR / MSECS_IN_MINUTE);
+
+  // getLastLocalBlockHeight() and getLastKnownBlockHeight() actually return the block index and not the block height
+  uint32_t localBlockchainHeight = NodeAdapter::instance().getLastLocalBlockHeight() + 1;
+  uint32_t networkBlockchainHeight = NodeAdapter::instance().getLastKnownBlockHeight() + 1;
+
+  if (localBlockchainHeight == networkBlockchainHeight)
+  {
+    Q_EMIT walletStateChangedSignal(QString(tr("Wallet synchronized. Height: %1 of %2")).
+      arg(QLocale(QLocale::English).toString(localBlockchainHeight)).
+      arg(QLocale(QLocale::English).toString(networkBlockchainHeight)));
+  }
+  else
+  {
+    Q_EMIT walletStateChangedSignal(QString(tr("%1")).
+      arg(warningString));
+  }
 
   QTimer::singleShot(LAST_BLOCK_INFO_UPDATING_INTERVAL, this, SLOT(updateBlockStatusText()));
 }
