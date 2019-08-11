@@ -3,4 +3,4 @@
 	url = https://github.com/cash2/cash2.git
 [submodule "cryptonote"]
 	path = cryptonote
-	url = https://github.com/cash2/cash2.git
+	url = https://github.com/cash2/cash2
