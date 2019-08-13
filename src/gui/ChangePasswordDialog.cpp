@@ -31,7 +31,7 @@ void ChangePasswordDialog::checkPassword(const QString& _password) {
   if (!m_ui->m_newPasswordEdit->text().trimmed().isEmpty() && !m_ui->m_newPasswordConfirmationEdit->text().trimmed().isEmpty())
   {
     passwordIsConfirmed = !m_ui->m_newPasswordEdit->text().compare(m_ui->m_newPasswordConfirmationEdit->text());
-    m_ui->m_errorLabel->setText(passwordIsConfirmed ? "" : tr("Password not match"));
+    m_ui->m_errorLabel->setText(passwordIsConfirmed ? "" : tr("Passwords not match"));
   }
   else
   {
