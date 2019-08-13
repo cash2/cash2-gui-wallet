@@ -64,7 +64,7 @@ TransactionDetailsDialog::TransactionDetailsDialog(const QModelIndex& _index, QW
     m_ui->m_detailsBrowser->setHtml(
       m_detailsTemplate
         // removes '+' and '-' from amount
-        .arg(amountWithFeeText.remove(0, 2))
+        .arg(amountWithoutFeeText.remove(0, 2))
         // adds commas to numbers
         .arg(QString("%1").arg(QLocale(QLocale::English).toString(numberOfConfirmations)))
         .arg(index.sibling(index.row(), TransactionsModel::COLUMN_DATE).data().toString())
@@ -90,7 +90,7 @@ TransactionDetailsDialog::TransactionDetailsDialog(const QModelIndex& _index, QW
     m_ui->m_detailsBrowser->setHtml(
       m_detailsTemplate
         // removes '+' and '-' from amount
-        .arg(amountWithoutFeeText.remove(0, 2))
+        .arg(amountWithFeeText.remove(0, 2))
         // adds commas to numbers
         .arg(QString("%1").arg(QLocale(QLocale::English).toString(numberOfConfirmations)))
         .arg(index.sibling(index.row(), TransactionsModel::COLUMN_DATE).data().toString().toLower())
