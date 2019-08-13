@@ -297,7 +297,7 @@ QVariant TransactionsModel::getUserRole(const QModelIndex& _index, int _role, Cr
     return QString::fromStdString(_transfer.address);
 
   case ROLE_AMOUNT:
-    return static_cast<qint64>(_transferId == CryptoNote::WALLET_LEGACY_INVALID_TRANSFER_ID ? _transaction.totalAmount : -_transfer.amount);
+    return static_cast<qint64>(_transaction.totalAmount);
 
   case ROLE_PAYMENT_ID:
     return NodeAdapter::instance().extractPaymentId(_transaction.extra);
