@@ -352,7 +352,10 @@ void WalletAdapter::saveCompleted(std::error_code _error) {
 
 void WalletAdapter::synchronizationProgressUpdated(uint32_t _current, uint32_t _total) {
   m_isSynchronized = false;
-  Q_EMIT walletStateChangedSignal(QString("%1 %2/%3").arg(tr("Synchronizing")).arg(_current).arg(_total));
+  Q_EMIT walletStateChangedSignal(QString("%1 Height %2 of %3").
+    arg(tr("Synchronizing ...")).
+    arg(QLocale(QLocale::English).toString(_current)).
+    arg(QLocale(QLocale::English).toString(_total)));
   Q_EMIT walletSynchronizationProgressUpdatedSignal(_current, _total);
 }
 
