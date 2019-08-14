@@ -117,6 +117,14 @@ QVariant TransactionsModel::headerData(int _section, Qt::Orientation _orientatio
 
   case ROLE_COLUMN:
     return _section;
+
+  case Qt::FontRole:
+  {
+    QFont font;
+    font.setBold(true);
+    return font;
+  }
+
   }
 
   return QVariant();
