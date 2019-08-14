@@ -56,6 +56,7 @@ private:
 
   QVariant getDisplayRole(const QModelIndex& _index) const;
   QVariant getDecorationRole(const QModelIndex& _index) const;
+  QVariant getBackgroundRole(const QModelIndex& _index) const;
   QVariant getAlignmentRole(const QModelIndex& _index) const;
   QVariant getUserRole(const QModelIndex& _index, int _role, CryptoNote::TransactionId _transactionId, CryptoNote::WalletLegacyTransaction& _transaction,
     CryptoNote::TransferId _transferId, CryptoNote::WalletLegacyTransfer& _transfer) const;

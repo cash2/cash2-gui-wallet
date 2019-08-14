@@ -9,6 +9,7 @@
 #include <QFont>
 #include <QMetaEnum>
 #include <QPixmap>
+#include <QBrush>
 
 #include "CurrencyAdapter.h"
 #include "NodeAdapter.h"
@@ -141,6 +142,9 @@ QVariant TransactionsModel::data(const QModelIndex& _index, int _role) const {
   case Qt::DisplayRole:
   case Qt::EditRole:
     return getDisplayRole(_index);
+
+  case Qt::BackgroundRole:
+    return getBackgroundRole(_index);
 
   case Qt::DecorationRole:
     return getDecorationRole(_index);
@@ -291,6 +295,18 @@ QVariant TransactionsModel::getDecorationRole(const QModelIndex& _index) const {
   }
 
   return QVariant();
+}
+
+QVariant TransactionsModel::getBackgroundRole(const QModelIndex& _index) const {
+  
+  // color the row red if sent money, color row green if received money
+  qint64 amount = _index.data(ROLE_AMOUNT).value<qint64>();
+  if (amount < 0)
+  {
+    return QVariant(QBrush(QColor("#FFE8E8")));
+  }
+
+  return QVariant(QBrush(QColor("#E8FFE8")));
 }
 
 QVariant TransactionsModel::getAlignmentRole(const QModelIndex& _index) const {
