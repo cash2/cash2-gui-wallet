@@ -69,8 +69,7 @@ Qt::ItemFlags TransactionsModel::flags(const QModelIndex& _index) const {
 }
 
 int TransactionsModel::columnCount(const QModelIndex& _parent) const {
-  // return TransactionsModel::staticMetaObject.enumerator(TransactionsModel::staticMetaObject.indexOfEnumerator("Columns")).keyCount();
-  return 3;
+  return TransactionsModel::staticMetaObject.enumerator(TransactionsModel::staticMetaObject.indexOfEnumerator("Columns")).keyCount();
 }
 
 int TransactionsModel::rowCount(const QModelIndex& _parent) const {
@@ -101,12 +100,14 @@ QVariant TransactionsModel::headerData(int _section, Qt::Orientation _orientatio
       return tr("Amount");
     case COLUMN_PAYMENT_ID:
       return tr("PaymentID");
+    case COLUMN_BALANCE:
+      return tr("Balance");
     default:
       break;
     }
 
   case Qt::TextAlignmentRole:
-    if (_section == COLUMN_DATE || _section == COLUMN_AMOUNT_WITH_FEE)
+    if (_section == COLUMN_DATE || _section == COLUMN_AMOUNT_WITH_FEE || _section == COLUMN_BALANCE)
     {
       return static_cast<int>(Qt::AlignHCenter | Qt::AlignVCenter);
     }
@@ -234,6 +235,31 @@ QVariant TransactionsModel::getDisplayRole(const QModelIndex& _index) const {
 
   case COLUMN_HEIGHT:
     return QString::number(_index.data(ROLE_HEIGHT).value<quint64>());
+
+  case COLUMN_BALANCE: {
+    qint64 amount = _index.data(ROLE_AMOUNT).value<qint64>();
+
+    uint64_t row = _index.row();
+
+    if (row == 0)
+    {
+      return CurrencyAdapter::instance().formatAmount(amount);
+    }
+    else
+    {
+      // get the data from the balance column in the previous row and remove the decimal point
+      QVariant balanceStr = _index.sibling(row - 1, COLUMN_BALANCE).data().toString().remove('.');
+
+      bool convertable;
+      quint64 balance = balanceStr.toLongLong(&convertable);
+      if(convertable) {
+        return CurrencyAdapter::instance().formatAmount(balance + amount);;
+      } else {
+        return "false";
+      }
+    }
+
+  }
 
   default:
     break;
