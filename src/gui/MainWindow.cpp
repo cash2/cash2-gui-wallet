@@ -494,8 +494,9 @@ void MainWindow::about() {
   dlg.exec();
 }
 
-void MainWindow::setStatusBarText(const QString& _text) {
+void MainWindow::setStatusBarText(const QString& _text, const QString& _textColor) {
   statusBar()->showMessage(_text);
+  statusBar()->setStyleSheet("border-top: 1px solid #C8C8C8; color:" + _textColor + ";");
 }
 
 void MainWindow::showMessage(const QString& _text, QtMsgType _type) {

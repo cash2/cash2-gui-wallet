@@ -53,7 +53,7 @@ private:
   void initUi();
 
   void minimizeToTray(bool _on);
-  void setStatusBarText(const QString& _text);
+  void setStatusBarText(const QString& _text, const QString& _textColor);
   void showMessage(const QString& _text, QtMsgType _type);
   void askForWalletPassword(bool _error);
   void encryptedFlagChanged(bool _encrypted);
