@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Saving data</string>
+   <string>Saving Data</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
