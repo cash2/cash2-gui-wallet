@@ -58,7 +58,7 @@ TransactionDetailsDialog::TransactionDetailsDialog(const QModelIndex& _index, QW
       "<span style=\" text-decoration:underline;\">Date</span></p><br>\n%3</p></p><br><br>\n\n"
       "<span style=\" text-decoration:underline;\">Sent To</span></p><br>\n%4</p></p><br><br>\n\n"
       "<span style=\" text-decoration:underline;\">Fee</span></p><br>\n%5</p></p><br><br>\n\n"
-      "<span style=\" text-decoration:underline;\">Transaction Id</span></p><br>\n%6</p></p><br><br>\n\n"
+      "<span style=\" text-decoration:underline;\">Transaction Hash</span></p><br>\n%6</p></p><br><br>\n\n"
       "<span style=\" text-decoration:underline;\">Transaction Private Key</span></p><br>\n%7</p><br>\n</body></html>";
 
     m_ui->m_detailsBrowser->setHtml(
@@ -85,7 +85,7 @@ TransactionDetailsDialog::TransactionDetailsDialog(const QModelIndex& _index, QW
       "<span style=\" font-size:40px;\">You received %1</span></p></p><br><br>\n\n"
       "<span style=\" text-decoration:underline;\">Block Confirmations</span></p><br>\n%2</p></p><br><br>\n\n"
       "<span style=\" text-decoration:underline;\">Date</span></p><br>\n%3</p></p><br><br>\n\n"
-      "<span style=\" text-decoration:underline;\">Transaction Id</span></p><br>\n%6</p><br>\n</body></html>";
+      "<span style=\" text-decoration:underline;\">Transaction Hash</span></p><br>\n%6</p><br>\n</body></html>";
 
     m_ui->m_detailsBrowser->setHtml(
       m_detailsTemplate
