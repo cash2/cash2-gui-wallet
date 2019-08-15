@@ -27,7 +27,7 @@
 #include "Settings.h"
 #include "WalletAdapter.h"
 #include "WalletEvents.h"
-#include "CreateWalletFromKeysDialog.h"
+#include "RestoreWalletFromKeysDialog.h"
 #include "PrivateKeysDialog.h"
 #include "ConnectionSettings.h"
 #include "CreateNewWalletDialog.h"
@@ -280,8 +280,8 @@ void MainWindow::openWallet() {
   }
 }
 
-void MainWindow::createWalletFromKeys() {
-  CreateWalletFromKeysDialog dlg(this);
+void MainWindow::restoreWalletFromKeys() {
+  RestoreWalletFromKeysDialog dlg(this);
   if (dlg.exec() == QDialog::Accepted) {
     QString filePath = dlg.getFilePath();
     QString spendSecretKeyQString = dlg.getSpendSecretKeyString().trimmed();
@@ -669,10 +669,10 @@ void MainWindow::deleteStartPrompt()
     m_ui->horizontalLayout_3 = nullptr;
   }
 
-  if (m_ui->m_createWalletFromKeysButton != nullptr)
+  if (m_ui->m_restoreWalletFromKeysButton != nullptr)
   {
-    delete m_ui->m_createWalletFromKeysButton;
-    m_ui->m_createWalletFromKeysButton = nullptr;
+    delete m_ui->m_restoreWalletFromKeysButton;
+    m_ui->m_restoreWalletFromKeysButton = nullptr;
   }
 
   if (m_ui->m_start != nullptr)

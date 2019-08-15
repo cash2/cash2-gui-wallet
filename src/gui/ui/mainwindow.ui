@@ -132,7 +132,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QPushButton" name="m_createWalletFromKeysButton">
+         <widget class="QPushButton" name="m_restoreWalletFromKeysButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -152,7 +152,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Create Wallet from Keys</string>
+           <string>Restore Wallet from Keys</string>
           </property>
          </widget>
         </item>
@@ -213,7 +213,7 @@
     <addaction name="menuRecent_wallets"/>
     <addaction name="m_openWalletAction"/>
     <addaction name="m_createNewWalletAction"/>
-    <addaction name="m_createWalletFromKeysAction"/>
+    <addaction name="m_restoreWalletFromKeysAction"/>
     <addaction name="m_closeWalletAction"/>
     <addaction name="separator"/>
     <addaction name="m_exitAction"/>
@@ -361,9 +361,9 @@
     <string>About</string>
    </property>
   </action>
-  <action name="m_createWalletFromKeysAction">
+  <action name="m_restoreWalletFromKeysAction">
    <property name="text">
-    <string>Create wallet from keys</string>
+    <string>Restore wallet from keys</string>
    </property>
   </action>
   <action name="m_showPrivateKeys">
@@ -460,10 +460,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_createWalletFromKeysAction</sender>
+   <sender>m_restoreWalletFromKeysAction</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>createWalletFromKeys()</slot>
+   <slot>restoreWalletFromKeys()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -620,10 +620,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_createWalletFromKeysButton</sender>
+   <sender>m_restoreWalletFromKeysButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>createWalletFromKeys()</slot>
+   <slot>restoreWalletFromKeys()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>20</x>

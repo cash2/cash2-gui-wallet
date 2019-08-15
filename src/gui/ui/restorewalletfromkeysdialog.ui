@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CreateWalletFromKeysDialog</class>
- <widget class="QDialog" name="CreateWalletFromKeysDialog">
+ <class>RestoreWalletFromKeysDialog</class>
+ <widget class="QDialog" name="RestoreWalletFromKeysDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -752,7 +752,7 @@
   <connection>
    <sender>m_password</sender>
    <signal>textChanged(QString)</signal>
-   <receiver>CreateWalletFromKeysDialog</receiver>
+   <receiver>RestoreWalletFromKeysDialog</receiver>
    <slot>checkPassword(QString)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -768,7 +768,7 @@
   <connection>
    <sender>m_passwordConfirm</sender>
    <signal>textChanged(QString)</signal>
-   <receiver>CreateWalletFromKeysDialog</receiver>
+   <receiver>RestoreWalletFromKeysDialog</receiver>
    <slot>checkPassword(QString)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -784,7 +784,7 @@
   <connection>
    <sender>m_okButton</sender>
    <signal>clicked()</signal>
-   <receiver>CreateWalletFromKeysDialog</receiver>
+   <receiver>RestoreWalletFromKeysDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -800,7 +800,7 @@
   <connection>
    <sender>m_cancelButton</sender>
    <signal>clicked()</signal>
-   <receiver>CreateWalletFromKeysDialog</receiver>
+   <receiver>RestoreWalletFromKeysDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
