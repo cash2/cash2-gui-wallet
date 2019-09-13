@@ -257,6 +257,7 @@ void MainWindow::createNewWallet() {
 
       WalletAdapter::instance().setWalletFile(filePath);
       WalletAdapter::instance().open(passwordQString);
+      showPrivateKeys();
     }
   }
 }
