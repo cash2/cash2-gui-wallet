@@ -31,6 +31,11 @@ QString CreateNewWalletDialog::getPasswordConfirmString() const {
 
 QString CreateNewWalletDialog::getFilePath() const {
   QString defaultDirectory = QDir::currentPath();
+
+#ifdef Q_OS_MACOS
+  defaultDirectory = QDir::homePath();
+#endif
+
   QString walletName = m_ui->m_walletName->text().trimmed();
   return QDir(defaultDirectory).filePath(walletName);
 }
