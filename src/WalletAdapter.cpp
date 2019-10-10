@@ -12,7 +12,6 @@
 
 #include <Common/Util.h>
 #include <Wallet/WalletErrors.h>
-#include <Wallet/LegacyKeysImporter.h>
 
 #include "NodeAdapter.h"
 #include "Settings.h"
@@ -89,12 +88,6 @@ void WalletAdapter::open(const QString& _password) {
   m_wallet->addObserver(this);
 
   if (QFile::exists(Settings::instance().getWalletFile())) {
-    if (Settings::instance().getWalletFile().endsWith(".keys")) {
-      if(!importLegacyWallet(_password)) {
-        return;
-      }
-    }
-
     if (Settings::instance().getWalletFile().endsWith(".wallet")) {
       if (openFile(Settings::instance().getWalletFile(), true)) {
         try {
@@ -127,36 +120,6 @@ void WalletAdapter::createWithKeys(const CryptoNote::AccountKeys& _keys, const s
 
 bool WalletAdapter::isOpen() const {
   return m_wallet != nullptr;
-}
-
-bool WalletAdapter::importLegacyWallet(const QString &_password) {
-  QString fileName = Settings::instance().getWalletFile();
-  Settings::instance().setEncrypted(!_password.isEmpty());
-  try {
-    fileName.replace(fileName.lastIndexOf(".keys"), 5, ".wallet");
-    if (!openFile(fileName, false)) {
-      delete m_wallet;
-      m_wallet = nullptr;
-      return false;
-    }
-
-    CryptoNote::importLegacyKeys(Settings::instance().getWalletFile().toStdString(), _password.toStdString(), m_file);
-    closeFile();
-    Settings::instance().setWalletFile(fileName);
-    return true;
-  } catch (std::system_error& _err) {
-    closeFile();
-    if (_err.code().value() == CryptoNote::error::WRONG_PASSWORD) {
-      Settings::instance().setEncrypted(true);
-      Q_EMIT openWalletWithPasswordSignal(!_password.isEmpty());
-    }
-  } catch (std::runtime_error& _err) {
-    closeFile();
-  }
-
-  delete m_wallet;
-  m_wallet = nullptr;
-  return false;
 }
 
 void WalletAdapter::close() {

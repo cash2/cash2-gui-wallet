@@ -10,7 +10,7 @@
 #include <QUrl>
 
 #include <CryptoNoteCore/CoreConfig.h>
-#include <P2p/NetNodeConfig.h>
+#include <P2p/NodeServerConfig.h>
 #include <Wallet/WalletErrors.h>
 
 #include "CurrencyAdapter.h"
@@ -50,8 +50,8 @@ public:
   }
 
   void start(Node** _node, const CryptoNote::Currency* currency,  INodeCallback* _callback, Logging::LoggerManager* _loggerManager,
-    const CryptoNote::CoreConfig& _coreConfig, const CryptoNote::NetNodeConfig& _netNodeConfig) {
-    (*_node) = createInprocessNode(*currency, *_loggerManager, _coreConfig, _netNodeConfig, *_callback);
+    const CryptoNote::CoreConfig& _coreConfig, const CryptoNote::NodeServerConfig& _nodeServerConfig) {
+    (*_node) = createInprocessNode(*currency, *_loggerManager, _coreConfig, _nodeServerConfig, *_callback);
     try {
       (*_node)->init([this](std::error_code _err) {
           if (_err) {
@@ -89,7 +89,7 @@ NodeAdapter::NodeAdapter() : QObject(), m_node(nullptr), m_nodeInitializerThread
   m_nodeInitializer->moveToThread(&m_nodeInitializerThread);
 
   qRegisterMetaType<CryptoNote::CoreConfig>("CryptoNote::CoreConfig");
-  qRegisterMetaType<CryptoNote::NetNodeConfig>("CryptoNote::NetNodeConfig");
+  qRegisterMetaType<CryptoNote::NodeServerConfig>("CryptoNote::NodeServerConfig");
 
   connect(m_nodeInitializer, &InProcessNodeInitializer::nodeInitCompletedSignal, this, &NodeAdapter::nodeInitCompletedSignal, Qt::QueuedConnection);
   connect(this, &NodeAdapter::initNodeSignal, m_nodeInitializer, &InProcessNodeInitializer::start, Qt::QueuedConnection);
@@ -217,8 +217,8 @@ bool NodeAdapter::initInProcessNode() {
   Q_ASSERT(m_node == nullptr);
   m_nodeInitializerThread.start();
   CryptoNote::CoreConfig coreConfig = makeCoreConfig();
-  CryptoNote::NetNodeConfig netNodeConfig = makeNetNodeConfig();
-  Q_EMIT initNodeSignal(&m_node, &CurrencyAdapter::instance().getCurrency(), this, &LoggerAdapter::instance().getLoggerManager(), coreConfig, netNodeConfig);
+  CryptoNote::NodeServerConfig nodeServerConfig = makeNodeServerConfig();
+  Q_EMIT initNodeSignal(&m_node, &CurrencyAdapter::instance().getCurrency(), this, &LoggerAdapter::instance().getLoggerManager(), coreConfig, nodeServerConfig);
   QEventLoop waitLoop;
   connect(m_nodeInitializer, &InProcessNodeInitializer::nodeInitCompletedSignal, &waitLoop, &QEventLoop::quit);
   connect(m_nodeInitializer, &InProcessNodeInitializer::nodeInitFailedSignal, &waitLoop, &QEventLoop::exit);
@@ -256,8 +256,8 @@ CryptoNote::CoreConfig NodeAdapter::makeCoreConfig() const {
   return config;
 }
 
-CryptoNote::NetNodeConfig NodeAdapter::makeNetNodeConfig() const {
-  CryptoNote::NetNodeConfig config;
+CryptoNote::NodeServerConfig NodeAdapter::makeNodeServerConfig() const {
+  CryptoNote::NodeServerConfig config;
   boost::program_options::variables_map options;
   boost::any p2pBindIp = Settings::instance().getP2pBindIp().toStdString();
   boost::any p2pBindPort = static_cast<uint16_t>(Settings::instance().getP2pBindPort());

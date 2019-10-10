@@ -71,7 +71,6 @@ private:
   void onWalletInitCompleted(int _error, const QString& _error_text);
   void onWalletSendTransactionCompleted(CryptoNote::TransactionId _transaction_id, int _error, const QString& _error_text);
 
-  bool importLegacyWallet(const QString &_password);
   bool save(const QString& _file, bool _details, bool _cache);
   void lock();
   void unlock();

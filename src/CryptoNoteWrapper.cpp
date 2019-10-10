@@ -10,11 +10,11 @@
 #include "CryptoNoteCore/Currency.h"
 #include "NodeRpcProxy/NodeRpcProxy.h"
 #include "CryptoNoteCore/CoreConfig.h"
-#include "P2p/NetNodeConfig.h"
+#include "P2p/NodeServerConfig.h"
 #include "CryptoNoteCore/Core.h"
 #include "CryptoNoteProtocol/CryptoNoteProtocolHandler.h"
 #include "InProcessNode/InProcessNode.h"
-#include "P2p/NetNode.h"
+#include "P2p/NodeServer.h"
 #include "WalletLegacy/WalletLegacy.h"
 #include "Logging/LoggerManager.h"
 #include "System/Dispatcher.h"
@@ -150,11 +150,11 @@ private:
 class InprocessNode : CryptoNote::INodeObserver, public Node {
 public:
   InprocessNode(const CryptoNote::Currency& currency, Logging::LoggerManager& logManager, const CryptoNote::CoreConfig& coreConfig,
-    const CryptoNote::NetNodeConfig& netNodeConfig, INodeCallback& callback) :
+    const CryptoNote::NodeServerConfig& nodeServerConfig, INodeCallback& callback) :
     m_currency(currency), m_dispatcher(),
     m_callback(callback),
     m_coreConfig(coreConfig),
-    m_netNodeConfig(netNodeConfig),
+    m_nodeServerConfig(nodeServerConfig),
     m_protocolHandler(currency, m_dispatcher, m_core, nullptr, logManager),
     m_core(currency, &m_protocolHandler, logManager),
     m_nodeServer(m_dispatcher, m_protocolHandler, logManager),
@@ -164,7 +164,7 @@ public:
     m_protocolHandler.set_p2p_endpoint(&m_nodeServer);
     CryptoNote::Checkpoints checkpoints(logManager);
     for (const CryptoNote::CheckpointData& checkpoint : CryptoNote::CHECKPOINTS) {
-      checkpoints.add_checkpoint(checkpoint.height, checkpoint.blockId);
+      checkpoints.add_checkpoint(checkpoint.blockIndex, checkpoint.blockId);
     }
   }
 
@@ -179,7 +179,7 @@ public:
         return;
       }
 
-      if (!m_nodeServer.init(m_netNodeConfig)) {
+      if (!m_nodeServer.init(m_nodeServerConfig)) {
         callback(make_error_code(CryptoNote::error::NOT_INITIALIZED));
         return;
       }
@@ -236,8 +236,8 @@ private:
   const CryptoNote::Currency& m_currency;
   System::Dispatcher m_dispatcher;
   CryptoNote::CoreConfig m_coreConfig;
-  CryptoNote::NetNodeConfig m_netNodeConfig;
-  CryptoNote::core m_core;
+  CryptoNote::NodeServerConfig m_nodeServerConfig;
+  CryptoNote::Core m_core;
   CryptoNote::CryptoNoteProtocolHandler m_protocolHandler;
   CryptoNote::NodeServer m_nodeServer;
   CryptoNote::InProcessNode m_node;
@@ -261,8 +261,8 @@ Node* createRpcNode(const CryptoNote::Currency& currency, INodeCallback& callbac
 }
 
 Node* createInprocessNode(const CryptoNote::Currency& currency, Logging::LoggerManager& logManager,
-  const CryptoNote::CoreConfig& coreConfig, const CryptoNote::NetNodeConfig& netNodeConfig, INodeCallback& callback) {
-  return new InprocessNode(currency, logManager, coreConfig, netNodeConfig, callback);
+  const CryptoNote::CoreConfig& coreConfig, const CryptoNote::NodeServerConfig& nodeServerConfig, INodeCallback& callback) {
+  return new InprocessNode(currency, logManager, coreConfig, nodeServerConfig, callback);
 }
 
 }

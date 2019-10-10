@@ -16,7 +16,7 @@ class INode;
 class IWalletLegacy;
 class Currency;
 class CoreConfig;
-class NetNodeConfig;
+class NodeServerConfig;
 
 }
 
@@ -51,6 +51,6 @@ public:
 
 Node* createRpcNode(const CryptoNote::Currency& currency, INodeCallback& callback, const std::string& nodeHost, unsigned short nodePort);
 Node* createInprocessNode(const CryptoNote::Currency& currency, Logging::LoggerManager& logManager,
-  const CryptoNote::CoreConfig& coreConfig, const CryptoNote::NetNodeConfig& netNodeConfig, INodeCallback& callback);
+  const CryptoNote::CoreConfig& coreConfig, const CryptoNote::NodeServerConfig& nodeServerConfig, INodeCallback& callback);
 
 }
